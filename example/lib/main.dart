@@ -21,7 +21,7 @@ final JMSingle kMockUser = JMSingle.fromJson({
             'appKey': kMockAppkey
           });
 
-const String kMockGroupId = '28987767';
+const String kMockGroupId = '29033635';
 final JMGroup kMockGroup = JMGroup.fromJson({
             'type': JMGroupType.private,
             'groupId': kMockGroupId
@@ -56,10 +56,10 @@ class _MyAppState extends State<MyApp> {
     jmessage..setDebugMode(enable: true);
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
 
-    // testAPIs();
+    testAPIs();
     // testMediaAPis();s
     // print('setup jmessage');
-    addListener();
+    // addListener();
   }
   void addListener() async {
     await jmessage.login(username: kMockUserName,password: kMockPassword);
@@ -86,7 +86,8 @@ class _MyAppState extends State<MyApp> {
       if (msg is JMImageMessage) {
         jmessage.sendImageMessage(
           type: msg.from.targetType,
-          path: msg.thumbPath
+          path: msg.thumbPath,
+          
         ).then((JMImageMessage message) {
           print('send image success ${message.toJson()}');
           jmessage.updateMyAvatar(imgPath: msg.thumbPath);
@@ -256,7 +257,7 @@ class _MyAppState extends State<MyApp> {
         });
 
         test('sendCustomMessage', () async {
-          JMVoiceMessage msg = await jmessage.sendCustomMessage(
+          JMCustomMessage msg = await jmessage.sendCustomMessage(
             type: kMockGroup,
             customObject: {'customKey1': 'customValue1'}
           );
@@ -531,7 +532,7 @@ class _MyAppState extends State<MyApp> {
             expect(gid, isNotNull);
           });
 
-          print('test   getGroupIds done');
+          print('test   getIds done');
         });
 
         test('updateGroupInfo', () async {
@@ -566,10 +567,11 @@ class _MyAppState extends State<MyApp> {
         });
 
         test('exitGroup', () async {
-          await jmessage.exitGroup(
-            id: kMockGroupId
-          );
-          print('test   exitGroup done');
+          // dart operation
+          // await jmessage.exitGroup(
+          //   id: kMockGroupId
+          // );
+          // print('test   exitGroup done');
         });
 
         test('getGroupMembers', () async {
@@ -737,18 +739,22 @@ class _MyAppState extends State<MyApp> {
         });
 
         test('setGroupMemberSilence', () async {
+          print('flutter test setGroupMemberSilence');
           await jmessage.setGroupMemberSilence(
             groupId: kMockGroupId,
             isSilence: true,
             username: '0002',
           );
+          print('flutter setGroupMemberSilence done');
 
           bool isSilenceMember = await jmessage.isSilenceMember(
             groupId: kMockGroupId,
             username: '0002'
           );
+          print('flutter isSilenceMember done');
 
-          expect(isSilenceMember, true);
+
+          expect(isSilenceMember, true, reason: 'isSilenceMember is not true');
 
           await jmessage.setGroupMemberSilence(
             groupId: kMockGroupId,
@@ -761,7 +767,8 @@ class _MyAppState extends State<MyApp> {
             username: '0002'
           );
 
-          expect(isSilenceMember, false);
+          expect(isSilenceMember, false, reason: 'isSilenceMember is not false');
+          print('flutter test setGroupMemberSilence isSilenceMember done');
         });
 
         test('groupSilenceMembers', () async {
@@ -864,6 +871,7 @@ class _MyAppState extends State<MyApp> {
           groups.map((group) {
             verifyGroupInfo(group);
           });
+          print('get group info success');
         });
 
         test('applyJoinGroup', () async {
@@ -896,36 +904,16 @@ class _MyAppState extends State<MyApp> {
     // logout
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  // Future<void> initPlatformState() async {
-  //   // JmessageFlutter jmessage = JmessageFlutter();
-  //   String platformVersion;
-  //   // Platform messages may fail, so we use a try/catch PlatformException.
-  //   try {
-  //     platformVersion = await jmessage.platformVersion;
-  //   } on PlatformException {
-  //     platformVersion = 'Failed to get platform version.';
-  //   }
-
-  //   // If the widget was removed from the tree while the asynchronous platform
-  //   // message was in flight, we want to discard the reply rather than calling
-  //   // setState to update our non-existent appearance.
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     _platformVersion = platformVersion;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       home: new Scaffold(
         appBar: new AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('JMessage Plugin App'),
         ),
         body: new Center(
-          child: new Text('Running on: $_platformVersion\n'),
+          child: new Text('Running Unit test... \n'),
         ),
       ),
     );

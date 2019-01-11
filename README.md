@@ -1,10 +1,57 @@
 # jmessage_flutter
 
-A new flutter plugin project.
+### 安装
 
-## Getting Started
+在工程 pubspec.yaml 中加入 dependencies
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+```
+dependencies:
+  jmessage_flutter: 0.0.1
+```
 
-For help on editing plugin code, view the [documentation](https://flutter.io/developing-packages/#edit-plugin-package).
+
+
+### 配置
+
+在 `/android/app/build.gradle` 中添加下列代码：
+
+```gradle
+android {
+    ......
+    defaultConfig {
+        applicationId "com.xxx.xxx" //JPush上注册的包名.
+        ......
+
+        ndk {
+            //选择要添加的对应cpu类型的.so库。
+            abiFilters 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
+            // 还可以添加 'x86', 'x86_64', 'mips', 'mips64'
+        }
+
+        manifestPlaceholders = [
+            JPUSH_PKGNAME : applicationId,
+            JPUSH_APPKEY : "你的appkey", //JPush上注册的包名对应的appkey.
+            JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
+        ......
+    }
+    ......
+}
+```
+
+
+
+### 使用
+
+```dart
+import 'package:jmessage_flutter/jmessage_flutter.dart';
+```
+
+
+
+### APIs
+
+**注意** : 需要先调用 `JmessageFlutter().init` 来初始化插件，才能保证其它功能正常工作。
+
+[参考]([参考](/documents/APIs.md))
+
