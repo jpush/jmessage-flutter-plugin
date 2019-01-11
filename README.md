@@ -1,3 +1,5 @@
+[![QQ Group](https://img.shields.io/badge/QQ%20Group-862401307-red.svg)]()
+
 # jmessage_flutter
 
 ### 安装
