@@ -16,7 +16,7 @@ String getStringFromEnum<T>(T) {
   return T.toString().split('.').last;
 }
 
-// retractedMessage 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMEventMessage | JMCustomMessage;
+// message 和 retractedMessage 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMEventMessage | JMCustomMessage;
 typedef JMMessageEventListener = void Function(dynamic message);
 typedef JMSyncOfflineMessageListener = void Function(JMConversationInfo conversation, List<dynamic> messageArray);
 typedef JMSyncRoamingMessageListener = void Function(JMConversationInfo conversation);
@@ -212,9 +212,9 @@ class JmessageFlutter {
           }
           break;
         case 'onReceiveGroupAdminReject':
-          for (JMReceiveApplyJoinGroupApprovalListener cb in _eventHanders.receiveApplyJoinGroupApproval) {
+          for (JMReceiveGroupAdminRejectListener cb in _eventHanders.receiveGroupAdminReject) {
             Map json = call.arguments.cast<dynamic, dynamic>();
-            cb(JMReceiveApplyJoinGroupApprovalEvent.fromJson(json));
+            cb(JMReceiveGroupAdminRejectEvent.fromJson(json));
           }
           break;
         case 'onReceiveGroupAdminApproval':
@@ -761,14 +761,14 @@ class JmessageFlutter {
 
   Future<void> removeGroupMembers({ 
       @required String id,
-      @required List<String> usernameArray,
+      @required List<String> usernames,
       String appKey,
     }) async {
     
     await _channel.invokeMethod('removeGroupMembers', 
       {
         'id': id,
-        'usernameArray': usernameArray,
+        'usernameArray': usernames,
         'appKey': appKey,
       }..removeWhere((key,value) => value == null));
     
@@ -1094,7 +1094,7 @@ class JmessageFlutter {
       'username': username,
       'appKey': appKey,
     }..removeWhere((key, value) => value == null));
-    
+    print('flutter isSilenceMember ${resJson}');
     return resJson['isSilence'];
   }
 
