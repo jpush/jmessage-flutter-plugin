@@ -16,7 +16,7 @@ A new flutter plugin project.
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.dependency 'JMessage'
-
   s.ios.deployment_target = '8.0'
+  s.static_framework = true
 end
 

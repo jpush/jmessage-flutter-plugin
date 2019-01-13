@@ -1,8 +1,8 @@
 name: jmessage_flutter
-description: A new flutter plugin project.
-version: 0.0.1
-author:
-homepage:
+description: Offically supported JMessage Flutter plugin.
+version: 0.0.2
+author: huminios <h380108184@gmail.com>
+homepage: https://www.jiguang.cn
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

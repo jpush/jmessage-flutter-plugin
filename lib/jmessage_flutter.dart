@@ -47,7 +47,6 @@ class JMEventHandlers {
     List<JMReceiveGroupAdminRejectListener> receiveGroupAdminReject = [];
     List<JMReceiveGroupAdminApprovalListener> receiveGroupAdminApproval = [];
     
-    // TODO:
     List<JMMessageRetractListener> retractMessage = [];
 }
 
