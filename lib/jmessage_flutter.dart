@@ -1274,7 +1274,7 @@ enum JMGender {
 }
 
 class JMSingle {
-  // TODO:
+
   final JMConversationType type = JMConversationType.single;
   String username;
   String appKey;
@@ -1496,7 +1496,7 @@ class JMNormalMessage {
     : id = json['id'],
       createTime = json['createTime'],
       serverMessageId = json['serverMessageId'],
-      isSend = json['isSend'] == 0 ? false : true, // TODO:
+      // isSend = json['isSend'], // TODO:
       from = JMUserInfo.fromJson(json['from']),
       extras = json['extras'] {
         switch (json['target']['type']) {

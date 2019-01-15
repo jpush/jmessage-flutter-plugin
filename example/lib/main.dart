@@ -56,12 +56,13 @@ class _MyAppState extends State<MyApp> {
     jmessage..setDebugMode(enable: true);
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
 
-    testAPIs();
+    // testAPIs();
     // testMediaAPis();s
     // print('setup jmessage');
-    // addListener();
+    addListener();
   }
   void addListener() async {
+    print('add listener receive ReceiveMessage');
     await jmessage.login(username: kMockUserName,password: kMockPassword);
     // jmessage.setNoDisturbGlobal(isNoDisturb: false);
 
