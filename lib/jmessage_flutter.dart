@@ -1496,7 +1496,7 @@ class JMNormalMessage {
     : id = json['id'],
       createTime = json['createTime'],
       serverMessageId = json['serverMessageId'],
-      // isSend = json['isSend'], // TODO:
+      isSend = json['isSend'],
       from = JMUserInfo.fromJson(json['from']),
       extras = json['extras'] {
         switch (json['target']['type']) {
