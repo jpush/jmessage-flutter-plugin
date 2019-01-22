@@ -293,7 +293,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   }
 
 
-  public void setup(MethodCall call, Result result) {
+  private void setup(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -315,7 +315,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void setDebugMode(MethodCall call, Result result) {
+  private void setDebugMode(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -328,7 +328,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
   
-  public void userRegister(MethodCall call, final Result result) {
+  private void userRegister(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, password;
     RegisterOptionalUserInfo optionalUserInfo = new RegisterOptionalUserInfo();
@@ -353,7 +353,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void login(MethodCall call, final Result result) {
+  private void login(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, password;
 
@@ -375,16 +375,16 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void logout(MethodCall call, Result result) {
+  private void logout(MethodCall call, Result result) {
     JMessageClient.logout();
   }
 
-  public void setBadge(MethodCall call, Result result) {
+  private void setBadge(MethodCall call, Result result) {
   //  NOTE:  android do not support this function.
     result.success(null);
   }
 
-  public void getMyInfo(MethodCall call, Result result) {
+  private void getMyInfo(MethodCall call, Result result) {
     UserInfo myInfo = JMessageClient.getMyInfo();
     if (myInfo != null) {
       result.success(toJson(myInfo));
@@ -394,7 +394,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void getUserInfo(MethodCall call, final Result result) {
+  private void getUserInfo(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, appKey;
 
@@ -421,7 +421,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void updateMyPassword(MethodCall call, final Result result) {
+  private void updateMyPassword(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String oldPwd, newPwd;
     try {
@@ -442,7 +442,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void updateMyAvatar(MethodCall call, final Result result) {
+  private void updateMyAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -468,7 +468,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void updateMyInfo(MethodCall call, final Result result) {
+  private void updateMyInfo(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     UserInfo myInfo = JMessageClient.getMyInfo();
     try {
@@ -533,7 +533,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void updateGroupAvatar(MethodCall call, final Result result) {
+  private void updateGroupAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     final String imgPath;
@@ -576,7 +576,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadThumbGroupAvatar(MethodCall call, final Result result) {
+  private void downloadThumbGroupAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String id;
     try {
@@ -605,7 +605,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadOriginalGroupAvatar(MethodCall call, final Result result) {
+  private void downloadOriginalGroupAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String id;
 
@@ -658,7 +658,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void setConversationExtras(MethodCall call, Result result) {
+  private void setConversationExtras(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     Conversation conversation;
     JSONObject extra = null;
@@ -686,7 +686,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     handleResult(toJson(conversation), 0, null, result);
   }
 
-  public void sendTextMessage(MethodCall call, Result result) {
+  private void sendTextMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     String text;
     Map<String, String> extras = null;
@@ -724,7 +724,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     sendMessage(conversation, content, messageSendingOptions, result);
   }
 
-  public void sendImageMessage(MethodCall call, Result result) {
+  private void sendImageMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
 
     String path;
@@ -774,7 +774,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     sendMessage(conversation, content, messageSendingOptions, result);
   }
 
-  public void sendVoiceMessage(MethodCall call, Result result) {
+  private void sendVoiceMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     String path;
     Map<String, String> extras = null;
@@ -826,7 +826,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void sendCustomMessage(MethodCall call, Result result) {
+  private void sendCustomMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -853,7 +853,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void sendFileMessage(MethodCall call, Result result) {
+  private void sendFileMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
 
     String path, fileName = "";
@@ -904,8 +904,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       handleResult(ERR_CODE_FILE, "File size is too large", result);
     }
   }
-  
-  public void sendLocationMessage(MethodCall call, Result result) {
+
+  private void sendLocationMessage(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
 
     double latitude, longitude;
@@ -950,7 +950,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     sendMessage(conversation, content, options, result);
   }
 
-  public void retractMessage(MethodCall call, final Result result) {
+  private void retractMessage(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
 
     Conversation conversation;
@@ -980,7 +980,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getHistoryMessages(MethodCall call, Result result) {
+  private void getHistoryMessages(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     Conversation conversation;
     int from, limit;
@@ -1030,7 +1030,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     result.success(messageJSONArr);
   }
 
-  public void getMessageById(MethodCall call, Result result) {
+  private void getMessageById(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
 
     Conversation conversation;
@@ -1060,7 +1060,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void deleteMessageById(MethodCall call, Result result) {
+  private void deleteMessageById(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     Conversation conversation;
     String messageId;
@@ -1094,7 +1094,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void sendInvitationRequest(MethodCall call, final Result result) {
+  private void sendInvitationRequest(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, appKey, reason;
 
@@ -1118,7 +1118,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void acceptInvitation(MethodCall call, final Result result) {
+  private void acceptInvitation(MethodCall call, final Result result) {
 
     HashMap<String, Object> map = call.arguments();
     String username, appKey;
@@ -1142,7 +1142,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void declineInvitation(MethodCall call, final Result result) {
+  private void declineInvitation(MethodCall call, final Result result) {
 
     HashMap<String, Object> map = call.arguments();
     String username, appKey, reason;
@@ -1169,7 +1169,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   }
 
-  public void removeFromFriendList(MethodCall call, final Result result) {
+  private void removeFromFriendList(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, appKey;
     try {
@@ -1202,7 +1202,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void updateFriendNoteName(MethodCall call, final Result result) {
+  private void updateFriendNoteName(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
 
     final String username, appKey, noteName;
@@ -1237,7 +1237,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void updateFriendNoteText(MethodCall call, final Result result) {
+  private void updateFriendNoteText(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final String username, appKey, noteText;
 
@@ -1273,7 +1273,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getFriends(MethodCall call, final Result result) {
+  private void getFriends(MethodCall call, final Result result) {
     ContactManager.getFriendList(new GetUserInfoListCallback() {
 
       @Override
@@ -1288,7 +1288,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void createGroup(MethodCall call, final Result result) {
+  private void createGroup(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String name, desc, avatarFilePath, groupType;
 
@@ -1330,7 +1330,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   }
 
 
-  public void getGroupInfo(MethodCall call, final Result result) {
+  private void getGroupInfo(MethodCall call, final Result result) {
 
     HashMap<String, Object> map = call.arguments();
 
@@ -1358,7 +1358,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getGroupIds(MethodCall call, final Result result) {
+  private void getGroupIds(MethodCall call, final Result result) {
     JMessageClient.getGroupIDList(new GetGroupIDListCallback() {
       @Override
       public void gotResult(int status, String desc, List<Long> list) {
@@ -1378,7 +1378,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   }
 
-  public void updateGroupInfo(MethodCall call, final Result result) {
+  private void updateGroupInfo(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     try {
@@ -1403,7 +1403,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void addGroupMembers(MethodCall call, final Result result) {
+  private void addGroupMembers(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
 
     long groupId;
@@ -1435,7 +1435,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void removeGroupMembers(MethodCall call, final Result result) {
+  private void removeGroupMembers(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     JSONArray usernameJsonArr;
@@ -1464,7 +1464,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void exitGroup(MethodCall call, final Result result) {
+  private void exitGroup(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     try {
@@ -1484,7 +1484,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getGroupMembers(MethodCall call, final Result result) {
+  private void getGroupMembers(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
 
@@ -1510,7 +1510,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void addUsersToBlacklist(MethodCall call, final Result result) {
+  private void addUsersToBlacklist(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     List<String> usernameList;
     String appKey;
@@ -1538,7 +1538,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void removeUsersFromBlacklist(MethodCall call, final Result result) {
+  private void removeUsersFromBlacklist(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     List<String> usernameList;
     String appKey;
@@ -1566,7 +1566,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getBlacklist(MethodCall call, final Result result) {
+  private void getBlacklist(MethodCall call, final Result result) {
     JMessageClient.getBlacklist(new GetBlacklistCallback() {
       @Override
       public void gotResult(int status, String desc, List list) {
@@ -1579,7 +1579,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void setNoDisturb(MethodCall call, final Result result) {
+  private void setNoDisturb(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -1635,7 +1635,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void getNoDisturbList(MethodCall call, final Result result) {
+  private void getNoDisturbList(MethodCall call, final Result result) {
     JMessageClient.getNoDisturblist(new GetNoDisurbListCallback() {
 
       @Override
@@ -1653,7 +1653,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void setNoDisturbGlobal(MethodCall call, final Result result) {
+  private void setNoDisturbGlobal(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -1672,7 +1672,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void isNoDisturbGlobal(MethodCall call, final Result result) {
+  private void isNoDisturbGlobal(MethodCall call, final Result result) {
     JMessageClient.getNoDisturbGlobal(new IntegerCallback() {
 
       @Override
@@ -1689,7 +1689,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void blockGroupMessage(MethodCall call, final Result result) {
+  private void blockGroupMessage(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final long groupId;
     final int isBlock; // true: 屏蔽；false: 取消屏蔽。
@@ -1721,7 +1721,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void isGroupBlocked(MethodCall call, final Result result) {
+  private void isGroupBlocked(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     try {
@@ -1749,7 +1749,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getBlockedGroupList(MethodCall call, final Result result) {
+  private void getBlockedGroupList(MethodCall call, final Result result) {
     JMessageClient.getBlockedGroupsList(new GetGroupInfoListCallback() {
       @Override
       public void gotResult(int status, String desc, List<GroupInfo> list) {
@@ -1769,7 +1769,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadThumbUserAvatar(MethodCall call, final Result result) {
+  private void downloadThumbUserAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, appKey;
 
@@ -1801,7 +1801,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadOriginalUserAvatar(MethodCall call, final Result result) {
+  private void downloadOriginalUserAvatar(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -1855,7 +1855,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void downloadThumbImage(MethodCall call, final Result result) {
+  private void downloadThumbImage(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final Message msg;
     try {
@@ -1893,7 +1893,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadOriginalImage(MethodCall call, final Result result) {
+  private void downloadOriginalImage(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final Message msg;
     try {
@@ -1931,7 +1931,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadVoiceFile(MethodCall call, final Result result) {
+  private void downloadVoiceFile(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final Message msg;
     try {
@@ -1970,7 +1970,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void downloadFile(MethodCall call, final Result result) {
+  private void downloadFile(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final Message msg;
 
@@ -2009,7 +2009,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void createConversation(MethodCall call, Result result) {
+  private void createConversation(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -2027,7 +2027,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void deleteConversation(MethodCall call, Result result) {
+  private void deleteConversation(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -2061,7 +2061,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void enterConversation(MethodCall call, Result result) {
+  private void enterConversation(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -2089,11 +2089,11 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void exitConversation(MethodCall call, Result result) {
+  private void exitConversation(MethodCall call, Result result) {
     JMessageClient.exitConversation();
   }
 
-  public void getConversation(MethodCall call, Result result) {
+  private void getConversation(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -2109,7 +2109,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void getConversations(MethodCall call, Result result) {
+  private void getConversations(MethodCall call, Result result) {
     List<Conversation> conversationList = JMessageClient.getConversationList();
     ArrayList jsonArr = new ArrayList();
     for (Conversation conversation : conversationList) {
@@ -2118,7 +2118,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     result.success(jsonArr);
   }
 
-  public void resetUnreadMessageCount(MethodCall call, Result result) {
+  private void resetUnreadMessageCount(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     try {
       JSONObject params = new JSONObject(map);
@@ -2131,7 +2131,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void transferGroupOwner(MethodCall call, final Result result) {
+  private void transferGroupOwner(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     final String username;
@@ -2163,7 +2163,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void setGroupMemberSilence(MethodCall call, final Result result) {
+  private void setGroupMemberSilence(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     final String username;
@@ -2198,7 +2198,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void isSilenceMember(MethodCall call, final Result result) {
+  private void isSilenceMember(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     final String username;
@@ -2230,7 +2230,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void groupSilenceMembers(MethodCall call, final Result result) {
+  private void groupSilenceMembers(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     try {
@@ -2255,7 +2255,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void setGroupNickname(MethodCall call, final Result result) {
+  private void setGroupNickname(MethodCall call, final Result result) {
 //    TODO:
     HashMap<String, Object> map = call.arguments();
     long groupId;
@@ -2291,19 +2291,19 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void enterChatRoom(MethodCall call, Result result) {
+  private void enterChatRoom(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     JSONObject params = new JSONObject(map);
     ChatRoomHandler.enterChatRoom(params, result);
   }
 
-  public void exitChatRoom(MethodCall call, Result result) {
+  private void exitChatRoom(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     JSONObject params = new JSONObject(map);
     ChatRoomHandler.exitChatRoom(params, result);
   }
 
-  public void getChatRoomConversation(MethodCall call, Result result) {
+  private void getChatRoomConversation(MethodCall call, Result result) {
     HashMap<String, Object> map = call.arguments();
     long chatRoomId;
     try {
@@ -2318,16 +2318,16 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   }
 
-  public void getChatRoomConversationList(MethodCall call, Result result) {
+  private void getChatRoomConversationList(MethodCall call, Result result) {
     ChatRoomHandler.getChatRoomConversationList(null, result);
   }
 
-  public void getAllUnreadCount(MethodCall call, Result result) {
+  private void getAllUnreadCount(MethodCall call, Result result) {
     int count = JMessageClient.getAllUnReadMsgCount();
     result.success(count);
   }
 
-  public void addGroupAdmins(MethodCall call, final Result result) {
+  private void addGroupAdmins(MethodCall call, final Result result) {
 //    TODO: test it.
     HashMap<String, Object> map = call.arguments();
     final String appKey;
@@ -2371,7 +2371,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void removeGroupAdmins(MethodCall call, final Result result) {
+  private void removeGroupAdmins(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final String appKey;
     final long groupId;
@@ -2414,7 +2414,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void changeGroupType(MethodCall call, final Result result) {
+  private void changeGroupType(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     final String type;
     long groupId;
@@ -2455,7 +2455,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void getPublicGroupInfos(MethodCall call, final Result result) {
+  private void getPublicGroupInfos(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String appKey;
     int start, count;
@@ -2478,7 +2478,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void applyJoinGroup(MethodCall call, final Result result) {
+  private void applyJoinGroup(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String reason;
     long groupId;
@@ -2499,7 +2499,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
-  public void processApplyJoinGroup(MethodCall call, final Result result) {
+  private void processApplyJoinGroup(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String reason, appKey;
     Boolean isAgree, isRespondInviter;
@@ -2562,7 +2562,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
   }
 
-  public void dissolveGroup(MethodCall call, final Result result) {
+  private void dissolveGroup(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
     try {
@@ -2741,7 +2741,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    */
   public void onEvent(LoginStateChangeEvent event) throws JSONException {
     HashMap json = new HashMap();
-    json.put("type", event.getReason());
+    json.put("type", event.getReason().toString());
+
     JmessageFlutterPlugin.instance.channel.invokeMethod("onLoginStateChanged", json);
   }
 
@@ -2752,7 +2753,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    */
   public void onEvent(ContactNotifyEvent event) throws JSONException {
     HashMap json = new HashMap();
-    json.put("type", event.getType());
+    json.put("type", event.getType().toString());
     json.put("reason", event.getReason());
     json.put("fromUsername", event.getFromUsername());
     json.put("fromUserAppKey", event.getfromUserAppKey());

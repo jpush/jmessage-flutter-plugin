@@ -1,3 +1,7 @@
+## 0.0.5 
+ 
+ fix: login state changed not fire in android
+
 ## 0.0.4
 
  fix：isSend 返回 null 的情况。
