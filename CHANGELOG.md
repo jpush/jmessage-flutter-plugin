@@ -1,4 +1,5 @@
 ## 0.0.5 
+ 
  fix: login state changed not fire in android
 
 ## 0.0.4
