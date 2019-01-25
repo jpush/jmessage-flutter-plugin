@@ -147,6 +147,9 @@ class JmessageFlutter {
     }
     
     Future<void> _handleMethod(MethodCall call) async {
+      // TODO:
+      print("receive event: with 1111111111111111");
+      print("receive event: with ${call.method} change ${call.arguments.cast<dynamic, dynamic>()}");
       switch (call.method) {
         case 'onReceiveMessage':
           for (JMMessageEventListener cb in _eventHanders.receiveMessage) {
@@ -159,6 +162,7 @@ class JmessageFlutter {
           }
           break;
         case 'onLoginStateChanged':
+          print("onloginstate change ${call.arguments.cast<dynamic, dynamic>()}");
           for (JMLoginStateChangedListener cb in _eventHanders.loginStateChanged) {
             String type = call.arguments.cast<dynamic, dynamic>()['type'];
             cb(getEnumFromString(JMLoginStateChangedType.values, type));
@@ -377,6 +381,64 @@ class JmessageFlutter {
     return res; // {id: string; filePath: string}
   }
 
+  Future<dynamic> createMessage({
+    @required JMMessageType type, // 消息类型
+    @required dynamic targetType, /// (JMSingle | JMGroup | JMChatRoom)
+    String text,
+    String path,
+    Map<dynamic, dynamic> customObject,
+    int latitude,
+    int longitude,
+    num scale,
+    String address,
+    Map<dynamic, dynamic> extras,
+  }) async {
+    Map param = targetType.toJson();
+    
+    
+    
+    if (extras != null) {
+      param..addAll({'extras': extras});
+    }
+
+    param..addAll({
+      'messageType': getStringFromEnum(type),
+      'text': text,
+      'path': path,
+      'customObject': customObject,
+      'latitude': latitude,
+      'longitude': longitude,
+      'scale': scale,
+      'address': address,
+      });
+
+    Map resMap = await _channel.invokeMethod('createMessage', 
+      param..removeWhere((key,value) => value == null));
+    var res = JMNormalMessage.generateMessageFromJson(resMap);
+    return res; 
+  }
+
+  /// message 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMCustomMessage;
+  /// NOTE: 不要传接收到的消息进去，只能传通过 createMessage 创建的消息。
+  Future<dynamic> sendMessage({
+    @required dynamic message,
+    JMMessageSendOptions sendOption
+    }) async {
+    Map param = message.target.targetType.toJson();
+
+    Map optionMap = {};
+
+    if (sendOption != null) {
+        optionMap = {'messageSendingOptions': sendOption.toJson()..removeWhere((key,value) => value == null)};
+    }
+
+    param..addAll(optionMap)..addAll({'id': message.id});
+    Map resMap = await _channel.invokeMethod('sendDraftMessage', 
+    param..removeWhere((key,value) => value == null));
+    var res = JMNormalMessage.generateMessageFromJson(resMap);
+    return res; 
+  }
+
   Future<JMTextMessage> sendTextMessage({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
     @required String text,
@@ -387,7 +449,6 @@ class JmessageFlutter {
     Map optionMap = {};
     if (sendOption != null) {
         optionMap = {'messageSendingOptions': sendOption.toJson()..removeWhere((key,value) => value == null)};
-        
     }
     
     if (extras != null) {
@@ -1469,10 +1530,22 @@ class JMUserInfo {
       gender = getEnumFromString(JMGender.values, json['gender']),
       extras = json['extras'];
 }
+enum JMMessageState {
+  draft, // 创建的消息，还未发送
+  sending, // 正在发送中
+  send_succeed, // 发送成功
+  receiving, // 接收中的消息，一般在 SDK 内部使用，无需考虑
+  received, // 已经成功接收
+  send_failed, // 发送失败
+  upload_succeed, // 上传成功
+  upload_failed, // 上传失败
+  download_failed // 接收消息时自动下载资源失败
+}
 
 class JMNormalMessage {
   
   String id;// 本地数据库中的消息 id
+  JMMessageState state; // 消息的状态
   String serverMessageId;// 对应服务器端的消息 id，只用于在服务端查询问题
   bool isSend;// 消息是否由当前用户发出。true：为当前用户发送；false：为对方用户发送。
   JMUserInfo from;// 消息发送者对象
@@ -1563,7 +1636,7 @@ class JMTextMessage extends JMNormalMessage {
 
 class JMVoiceMessage extends JMNormalMessage {
   String path; // 语音文件路径,如果为空需要调用相应下载方法，注意这是本地路径，不能是 url
-  double duration; // 语音时长，单位秒
+  num duration; // 语音时长，单位秒
 
   Map toJson() {
     var json = super.toJson();
@@ -1947,6 +2020,7 @@ class JMConversationInfo {
       extras: extras,
     );
   }
+  
   
   // sendText
   Future<JMTextMessage> sendTextMessage({
