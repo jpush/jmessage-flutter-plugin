@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import cn.jpush.im.android.api.content.MessageContent;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
@@ -157,6 +159,10 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       downloadOriginalGroupAvatar(call, result);
     } else if (call.method.equals("setConversationExtras")) {
       setConversationExtras(call, result);
+    } else if (call.method.equals("createMessage")) {
+      createMessage(call, result);
+    } else if (call.method.equals("sendDraftMessage")) {
+      sendDraftMessage(call, result);
     } else if (call.method.equals("sendTextMessage")) {
       sendTextMessage(call, result);
     } else if (call.method.equals("sendImageMessage")) {
@@ -684,6 +690,122 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     String extraStr = extra == null ? "" : extra.toString();
     conversation.updateConversationExtra(extraStr);
     handleResult(toJson(conversation), 0, null, result);
+  }
+
+  private void createMessage(MethodCall call, Result result) {
+    HashMap<String, Object> map = call.arguments();
+    String text;
+    Map<String, String> extras = null;
+    Conversation conversation;
+
+    try {
+      JSONObject params = new JSONObject(map);
+      conversation = JMessageUtils.createConversation(params);
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+        return;
+      }
+
+      if (params.has("extras")) {
+        extras = fromJson(params.getJSONObject("extras"));
+      }
+
+      String type = params.getString("messageType");
+      MessageContent content;
+      switch (type) {
+        case "text":
+          content = new TextContent(params.getString("text"));
+          break;
+        case "image":
+          String path = params.getString("path");
+          String suffix = path.substring(path.lastIndexOf(".") + 1);
+          content = new ImageContent(new File(path), suffix);
+          break;
+        case "voice":
+          path = params.getString("path");
+          File file = new File(path);
+          MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(path));
+          int duration = mediaPlayer.getDuration() / 1000; // Millisecond to second.
+          content = new VoiceContent(file, duration);
+          mediaPlayer.release();
+          break;
+        case "file":
+          path = params.getString("path");
+          file = new File(path);
+          content = new FileContent(file);
+          break;
+        case "custom":
+          JSONObject customObject = params.getJSONObject("customObject");
+          CustomContent customContent= new CustomContent();
+          customContent.setAllValues(fromJson(customObject));
+          content = customContent;
+          break;
+        case "location":
+          double latitude = params.getDouble("latitude");
+          double longitude = params.getDouble("latitude");
+          int scale = params.getInt("scale");
+          String address = params.getString("address");
+          content = new LocationContent(latitude, longitude, scale, address);
+          break;
+        default:
+          content = new CustomContent();
+          break;
+      }
+
+      if (params.has("extras")) {
+        extras = fromJson(params.getJSONObject("extras"));
+        content.setExtras(extras);
+      }
+
+      final Message msg = conversation.createSendMessage(content);
+      result.success(toJson(msg));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+  }
+
+  private void sendDraftMessage(MethodCall call, final Result result) {
+    HashMap<String, Object> map = call.arguments();
+
+
+    MessageSendingOptions messageSendingOptions = null;
+    Conversation conversation;
+
+    try {
+      JSONObject params = new JSONObject(map);
+      conversation = JMessageUtils.createConversation(params);
+      final Message message = conversation.getMessage(Integer.parseInt(params.getString("id")));
+
+      if (params.has("messageSendingOptions")) {
+        messageSendingOptions = toMessageSendingOptions(params.getJSONObject("messageSendingOptions"));
+      }
+
+      message.setOnSendCompleteCallback(new BasicCallback() {
+        @Override
+        public void gotResult(int status, String desc) {
+          if (status == 0) {
+            HashMap json = JsonUtils.toJson(message);
+            handleResult(json, status, desc, result);
+          } else {
+            handleResult(status, desc, result);
+          }
+        }
+      });
+
+      if (messageSendingOptions == null) {
+        JMessageClient.sendMessage(message);
+      } else {
+        JMessageClient.sendMessage(message, messageSendingOptions);
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
   }
 
   private void sendTextMessage(MethodCall call, Result result) {

@@ -236,7 +236,32 @@ class JsonUtils {
         default:
         }
         result.put("target", targetJson);
-
+        switch (msg.getStatus()) {
+            case created:
+                result.put("state", "draft");
+                break;
+            case send_going:
+                result.put("state", "sending");
+                break;
+            case send_fail:
+                result.put("state", "send_failed");
+                break;
+            case send_draft:
+                result.put("state", "draft");
+                break;
+            case receive_fail:
+                result.put("state", "download_failed");
+                break;
+            case send_success:
+                result.put("state", "send_succeed");
+                break;
+            case receive_going:
+                result.put("state", "receiving");
+                break;
+            case receive_success:
+                result.put("state", "received");
+                break;
+        }
         MessageContent content = msg.getContent();
         if (content.getStringExtras() != null) {
 //            TODO:

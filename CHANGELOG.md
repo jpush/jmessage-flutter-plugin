@@ -1,3 +1,12 @@
+## 0.0.7
+ 
+ new feature: add message.state property
+
+## 0.0.6
+ 
+ fix: voice message error
+ new feature: add createMessage and sendMessage api
+
 ## 0.0.5 
  
  fix: login state changed not fire in android

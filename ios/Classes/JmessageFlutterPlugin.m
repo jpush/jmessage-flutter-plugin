@@ -19,6 +19,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 @interface JmessageFlutterPlugin ()
 
 @property(strong,nonatomic)NSMutableDictionary<NSString *, FlutterResult> *SendMsgCallbackDic;//{@"msgid": @"", @"callbackID": @""}
+@property(strong,nonatomic)NSMutableDictionary<NSString *, JMSGMessage *> *draftMessageCache;
 @end
 
 @implementation JmessageFlutterPlugin
@@ -34,6 +35,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (instancetype)init {
   self = [super init];
   self.SendMsgCallbackDic = @{}.mutableCopy;
+  self.draftMessageCache = @{}.mutableCopy;
   return self;
 }
 
@@ -45,11 +47,14 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }
   
   NSString *appKey = nil;
-  if (param[@"appKey"]) {
-    appKey = param[@"appKey"];
-  } else {
+  
+  if (param[@"appKey"] == nil ||
+      [param[@"appKey"] isEqualToString:@""]) {
     appKey = self.JMessageAppKey;
+  } else {
+    appKey = param[@"appKey"];
   }
+  
   JMSGConversationType conversationType = [self convertStringToConvsersationType:param[@"type"]];
   switch (conversationType) {
     case kJMSGConversationTypeSingle:{
@@ -336,6 +341,10 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self downloadOriginalGroupAvatar:call result:result];
   } else if([@"setConversationExtras" isEqualToString:call.method]) {
     [self setConversationExtras:call result:result];
+  } else if([@"createMessage" isEqualToString:call.method]) {
+    [self createMessage:call result:result];
+  } else if([@"sendDraftMessage" isEqualToString:call.method]) {
+    [self sendDraftMessage:call result:result];
   } else if([@"sendTextMessage" isEqualToString:call.method]) {
     [self sendTextMessage:call result:result];
   } else if([@"sendImageMessage" isEqualToString:call.method]) {
@@ -828,6 +837,82 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     }
   }];
 }
+
+- (void)createMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSDictionary *param = call.arguments;
+  
+  JMSGOptionalContent *messageSendingOptions = nil;
+  if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
+    messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
+  }
+  
+  JMSGContentType type = [self convertStringToContentType: param[@"messageType"]];
+  
+  JMSGMessage *message = [self createMessageWithDictionary:param type: type];
+  if (!message) {
+    NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
+    result([error flutterError]);
+    return;
+  } else {
+    self.draftMessageCache[message.msgId] = message;
+    result([message messageToDictionary]);
+  }
+}
+
+- (void)sendDraftMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSDictionary *param = call.arguments;
+  
+  [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+    if (error) {
+
+      result([error flutterError]);
+      return;
+    }
+    
+    JMSGMessage *message = nil;
+    if (self.draftMessageCache[param[@"id"]]) {
+      message = self.draftMessageCache[param[@"id"]];
+      [self.draftMessageCache removeObjectForKey:param[@"id"]];
+    } else {
+      NSError *error = [NSError errorWithDomain:@"this message is not create frome [createMessage] api, can not be send!" code: 1 userInfo: nil];
+      result([error flutterError]);
+      return;
+    }
+    
+//    if (!message) {
+//      NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
+//      result([error flutterError]);
+//      return;
+//    }
+    
+    if ([message.content isKindOfClass:[JMSGMediaAbstractContent class]]) {
+      JMSGMediaAbstractContent *content = (JMSGMediaAbstractContent *)message.content;
+      content.uploadHandler = ^(float percent, NSString *msgID) {
+      };
+    }
+    
+    JMSGOptionalContent *messageSendingOptions = nil;
+    if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
+      messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
+    }
+    
+    self.SendMsgCallbackDic[message.msgId] = result;
+    
+    if (param[@"extras"] && [param[@"extras"] isKindOfClass: [NSDictionary class]]) {
+      NSDictionary *extras = param[@"extras"];
+      for (NSString *key in extras.allKeys) {
+        [message.content addStringExtra:extras[key] forKey:key];
+      }
+    }
+    
+    if (messageSendingOptions) {
+      [conversation sendMessage:message optionalContent:messageSendingOptions];
+    } else {
+      [conversation sendMessage:message];
+    }
+  }];
+}
+
 
 - (void)sendTextMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;

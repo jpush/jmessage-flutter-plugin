@@ -161,7 +161,7 @@
     case kJMSGGroupTypePublic:
       dict[@"groupType"] = @"public";
       break;
-      
+
     default:
       dict[@"groupType"] = @"private";
       break;
@@ -221,6 +221,39 @@
   dict[@"id"] = self.msgId; // 本地数据库中的消息 Id。
   dict[@"serverMessageId"] = self.serverMessageId;  // 服务器端对应的消息 Id。
   dict[@"from"] = [self.fromUser userToDictionary];
+
+  switch (self.status) {
+    case kJMSGMessageStatusSendDraft:
+      dict[@"state"] = @"draft";
+      break;
+    case kJMSGMessageStatusSending:
+      dict[@"state"] = @"sending";
+      break;
+    case kJMSGMessageStatusSendSucceed:
+      dict[@"state"] = @"send_succeed";
+      break;
+    case kJMSGMessageStatusReceiving:
+      dict[@"state"] = @"receiving";
+      break;
+    case kJMSGMessageStatusSendFailed:
+      dict[@"state"] = @"send_failed";
+      break;
+    case kJMSGMessageStatusReceiveDownloadFailed:
+      dict[@"state"] = @"download_failed";
+      break;
+    case kJMSGMessageStatusSendUploadSucceed:
+      dict[@"state"] = @"upload_succeed";
+      break;
+    case kJMSGMessageStatusReceiveSucceed:
+      dict[@"state"] = @"received";
+      break;
+    case kJMSGMessageStatusSendUploadFailed:
+      dict[@"state"] = @"upload_failed";
+      break;
+    default:
+      dict[@"state"] = @"send_succeed";
+      break;
+  }
   
   if (self.content.extras != nil) {
     dict[@"extras"] = self.content.extras;
