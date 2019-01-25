@@ -37,6 +37,8 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [addGroupMembers](#addgroupmembers)
   - [removeGroupMembers](#removegroupmembers)
 - [聊天](#聊天)
+  - [createMessage](#createmessage)
+  - [sendMessage](#sendmessage)
   - [sendTextMessage](#sendtextmessage)
   - [sendImageMessage](#sendimagemessage)
   - [sendVoiceMessage](#sendvoicemessage)
@@ -547,6 +549,50 @@ await JMessage.processApplyJoinGroup(
 - reason (string): 入群理由。
 
 ## 聊天
+
+### createMessage
+
+创建消息，创建好消息后需要调用 [sendMessage](#sendMessage) 来发送消息。如果需要状态更新（发送中 -> 发送完成）可以使用这种方式，聊天室不支持该接口。
+
+```dart
+var message = await jmessage.createMessage(
+          type: JMMessageType.image,
+          targetType: msg.from.targetType,
+          path: msg.thumbPath,
+          extras: {"key1": "value1"}
+        );
+```
+
+- type: 不同的消息类型需要不同的参数。
+  - type = text 时 `text` 为必填。
+  - type = image 时 `path` 为必填。
+  - type = voice 时 `path` 为必填。
+  - type = file 时 `path` 为必填。
+  - type = location 时 `latitude` `longitude` 和 `scale` 为必填，`address` 选填。
+  - type = custom 时 `customObject` 为必填。
+
+### sendMessage
+
+与 [createMessage](#createMessage) 配合使用，用于发送创建好的消息。
+
+```dart
+var message = await jmessage.createMessage(
+          type: JMMessageType.image,
+          targetType: msg.from.targetType,
+          path: msg.thumbPath,
+          extras: {"key1": "value1"}
+        );
+  
+var sendedMessage = await jmessage.sendMessage(
+          message: message,
+          sendOption: JMMessageSendOptions.fromJson({
+              'isShowNotification': true, 
+              'isRetainOffline': true,
+          })
+        );
+```
+
+
 
 ### sendTextMessage
 
