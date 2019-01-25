@@ -1570,6 +1570,7 @@ class JMNormalMessage {
       createTime = json['createTime'],
       serverMessageId = json['serverMessageId'],
       isSend = json['isSend'],
+      state =  getEnumFromString(JMMessageState.values, json['state']),
       from = JMUserInfo.fromJson(json['from']),
       extras = json['extras'] {
         switch (json['target']['type']) {
