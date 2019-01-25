@@ -421,7 +421,7 @@ class JmessageFlutter {
   /// message 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMCustomMessage;
   /// NOTE: 不要传接收到的消息进去，只能传通过 createMessage 创建的消息。
   Future<dynamic> sendMessage({
-    @required dynamic message,
+    @required JMNormalMessage message,
     JMMessageSendOptions sendOption
     }) async {
     Map param = message.target.targetType.toJson();
