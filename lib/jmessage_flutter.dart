@@ -147,9 +147,6 @@ class JmessageFlutter {
     }
     
     Future<void> _handleMethod(MethodCall call) async {
-      // TODO:
-      print("receive event: with 1111111111111111");
-      print("receive event: with ${call.method} change ${call.arguments.cast<dynamic, dynamic>()}");
       switch (call.method) {
         case 'onReceiveMessage':
           for (JMMessageEventListener cb in _eventHanders.receiveMessage) {
@@ -162,7 +159,6 @@ class JmessageFlutter {
           }
           break;
         case 'onLoginStateChanged':
-          print("onloginstate change ${call.arguments.cast<dynamic, dynamic>()}");
           for (JMLoginStateChangedListener cb in _eventHanders.loginStateChanged) {
             String type = call.arguments.cast<dynamic, dynamic>()['type'];
             cb(getEnumFromString(JMLoginStateChangedType.values, type));
@@ -1154,7 +1150,6 @@ class JmessageFlutter {
       'username': username,
       'appKey': appKey,
     }..removeWhere((key, value) => value == null));
-    print('flutter isSilenceMember ${resJson}');
     return resJson['isSilence'];
   }
 

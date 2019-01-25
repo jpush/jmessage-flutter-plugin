@@ -1,3 +1,7 @@
+## 0.0.7
+ 
+ new feature: add message.state property
+
 ## 0.0.6
  
  fix: voice message error
