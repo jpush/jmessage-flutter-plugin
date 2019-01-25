@@ -55,5 +55,5 @@ import 'package:jmessage_flutter/jmessage_flutter.dart';
 
 **注意** : 需要先调用 `JmessageFlutter().init` 来初始化插件，才能保证其它功能正常工作。
 
-[参考]([参考](/documents/APIs.md))
+[参考](/documents/APIs.md)
 
