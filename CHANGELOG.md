@@ -1,3 +1,7 @@
+## 0.0.8
+ 
+ fix: group.maxMemberCount type
+
 ## 0.0.7
  
  new feature: add message.state property
