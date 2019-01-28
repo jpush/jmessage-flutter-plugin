@@ -152,9 +152,9 @@
   dict[@"flag"] = self.flag;
   dict[@"owner"] = self.owner;
   dict[@"ownerAppKey"] = self.ownerAppKey;
-  dict[@"maxMemberCount"] = self.maxMemberCount;
+  dict[@"maxMemberCount"] = @([self.maxMemberCount integerValue]);
   dict[@"isNoDisturb"] = @(self.isNoDisturb);
-  dict[@"isShieldMessage"] = @(self.isShieldMessage);
+  dict[@"isBlocked"] = @(self.isShieldMessage);
   dict[@"displayName"] = self.displayName;
   
   switch (self.groupType) {

@@ -264,6 +264,10 @@ class JmessageFlutter {
     @required String username,
     @required String password,
   }) async {
+    if (username == null ||
+        password == null) {
+      throw("username or password was passed null");
+    }
     await _channel.invokeMethod('login', {
       'username': username,
       'password': password
@@ -1853,7 +1857,7 @@ class JMGroupInfo {
   int level;  // 群组等级，默认等级 4
   String owner; // 群主的 username
   String ownerAppKey; // 群主的 appKey
-  String maxMemberCount; // 最大成员数
+  int maxMemberCount; // 最大成员数
   bool isNoDisturb; // 是否免打扰
   bool isBlocked; // 是否屏蔽群消息
   JMGroupType groupType; // 群类型
