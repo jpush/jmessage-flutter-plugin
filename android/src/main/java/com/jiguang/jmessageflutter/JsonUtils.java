@@ -161,7 +161,7 @@ class JsonUtils {
 
 //        result.put("ownerAppKey", groupInfo.getOwnerMemberInfo().getUserInfo().getAppKey());
         result.put("ownerAppKey", groupInfo.getOwnerAppkey() != null ? groupInfo.getOwnerAppkey() : "");
-        result.put("maxMemberCount", "" + groupInfo.getMaxMemberCount());
+        result.put("maxMemberCount", groupInfo.getMaxMemberCount());
         result.put("isNoDisturb", groupInfo.getNoDisturb() == 1);
         result.put("isBlocked", groupInfo.isGroupBlocked() == 1);
 
