@@ -1,3 +1,7 @@
+## 0.0.9
+ 
+ fix: JMConversationInfo getHistoryMessages helper function
+
 ## 0.0.8
  
  fix: group.maxMemberCount type
