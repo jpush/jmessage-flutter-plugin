@@ -2119,6 +2119,7 @@ class JMConversationInfo {
     @required int limit,
   }) async {
     List msgs = await JmessageFlutter().getHistoryMessages(
+      type: target.targetType,
       from: from,
       limit: limit
     );
