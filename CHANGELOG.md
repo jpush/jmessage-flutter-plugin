@@ -1,3 +1,7 @@
+## 0.0.10
+ fix: updateGroupInfo update desc error.
+ new feature: add extras field in JMConversationInfo.
+
 ## 0.0.9
  
  fix: JMConversationInfo getHistoryMessages helper function
