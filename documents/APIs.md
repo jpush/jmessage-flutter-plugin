@@ -33,6 +33,7 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [dissolveGroup](#dissolvegroup)
   - [getGroupIds](#getgroupids)
   - [getGroupInfo](#getgroupinfo)
+  - [getGroupMembers](#getgroupmembers)
   - [updateGroupInfo](#updategroupinfo)
   - [addGroupMembers](#addgroupmembers)
   - [removeGroupMembers](#removegroupmembers)
@@ -384,6 +385,16 @@ JMessage.getGroupInfo( id: "1234567" )
 #### 参数说明
 
 - id(string): 指定群组
+
+### getGroupMembers
+
+获取群成员。
+
+#### 示例
+
+```dart
+List<JMGroupMemberInfo>members =  await JMessage.getGroupMembers( id: 'groupId');
+```
 
 ### updateGroupInfo
 
