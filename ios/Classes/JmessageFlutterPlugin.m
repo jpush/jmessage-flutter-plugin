@@ -822,7 +822,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }
   
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
-    if (error) {
+    
       if (error) {
         result([error flutterError]);
         return ;
@@ -834,7 +834,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       }
       result([conversation conversationToDictionary]);
       return;
-    }
+    
   }];
 }
 

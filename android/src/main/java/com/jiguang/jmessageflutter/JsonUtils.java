@@ -430,9 +430,9 @@ class JsonUtils {
             for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
                 extrasMap.put(entry.getKey(), entry.getValue().toString());
             }
-            json.put("extra", extrasMap);
+            json.put("extras", extrasMap);
         } else {
-            json.put("extra", new HashMap());
+            json.put("extras", new HashMap());
         }
 
         Log.d("flutter plugin","native the conversation:" + json.toString());
