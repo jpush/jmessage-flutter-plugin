@@ -822,7 +822,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }
   
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
-    if (error) {
+    
       if (error) {
         result([error flutterError]);
         return ;
@@ -834,7 +834,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       }
       result([conversation conversationToDictionary]);
       return;
-    }
+    
   }];
 }
 
@@ -1423,7 +1423,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     
     JMSGGroup *group = resultObject;
     NSString *newName = group.displayName;
-    NSString *newDesc = group.description;
+    NSString *newDesc = group.desc;
     
     if (param[@"newName"]) {
       newName = param[@"newName"];

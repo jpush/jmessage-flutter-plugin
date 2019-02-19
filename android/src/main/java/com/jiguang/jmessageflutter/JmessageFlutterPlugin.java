@@ -678,8 +678,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         return;
       }
 
-      if (params.has("extra")) {
-        extra = params.getJSONObject("extra");
+      if (params.has("extras")) {
+        extra = params.getJSONObject("extras");
       }
     } catch (JSONException e) {
       e.printStackTrace();

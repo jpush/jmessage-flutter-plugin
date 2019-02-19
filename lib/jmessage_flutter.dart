@@ -1988,11 +1988,13 @@ class JMConversationInfo {
   int unreadCount; // 未读消息数
   dynamic target; // JMUserInfo or JMGroupInfo or JMChatRoom
   dynamic latestMessage; // 最近的一条消息对象。如果不存在消息，则 conversation 对象中没有该属性。
-  
+  Map<dynamic, dynamic> extras;
+
   JMConversationInfo.fromJson(Map<dynamic, dynamic> json)
     : conversationType = getEnumFromString(JMConversationType.values, json['conversationType']),
       title = json['title'],
-      unreadCount = json['unreadCount'] {
+      unreadCount = json['unreadCount'],
+      extras = json['extras'] {
         switch (conversationType) {
           case JMConversationType.single:
             target = JMUserInfo.fromJson(json['target']);
@@ -2015,6 +2017,7 @@ class JMConversationInfo {
 
   // extras use Map<String, String>
   Future<void> setExtras(Map<dynamic, dynamic> extras) async {
+    this.extras = extras;
     await JmessageFlutter().setConversationExtras(
       type: target.targetType,
       extras: extras,
