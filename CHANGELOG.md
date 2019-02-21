@@ -1,3 +1,6 @@
+## 0.0.11
+ fix: jmessage login api remove without avatar path error.
+
 ## 0.0.10
  fix: updateGroupInfo update desc error.
  new feature: add extras field in JMConversationInfo.
