@@ -606,11 +606,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     JMSGUser *myInfo = [JMSGUser myInfo];
     // 为了和 Android 行为一致，在登录的时候自动下载缩略图。
     [myInfo thumbAvatarData:^(NSData *data, NSString *objectId, NSError *error) {
-      if (error) {
-        result([error flutterError]);
-        return;
-      }
-      
+      // 下载失败也及时返回。
       result(nil);
     }];
   }];
