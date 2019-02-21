@@ -1,4 +1,5 @@
 [![QQ Group](https://img.shields.io/badge/QQ%20Group-862401307-red.svg)]()
+[![pub package](https://img.shields.io/pub/v/jmessage_flutter.svg)](https://pub.flutter-io.cn/packages/jmessage_flutter)
 
 # jmessage_flutter
 
