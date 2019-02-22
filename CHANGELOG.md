@@ -1,3 +1,6 @@
+## 0.0.12
+ feature: onLoginStateChanged add user_kicked event.
+
 ## 0.0.11
  fix: jmessage login api remove without avatar path error.
 
