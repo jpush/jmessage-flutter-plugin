@@ -1740,7 +1740,7 @@ class JMEventMessage extends JMNormalMessage {
 }
 
 enum JMLoginStateChangedType {
-  user_password_change, user_logout, user_deleted, user_login_status_unexpected
+  user_password_change, user_logout, user_deleted, user_login_status_unexpected, user_kicked
 }
 
 enum JMContactNotifyType {
