@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1106,7 +1107,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     HashMap<String, Object> map = call.arguments();
     Conversation conversation;
     int from, limit;
-
+    boolean isDescend;
     try {
       JSONObject params = new JSONObject(map);
 
@@ -1115,6 +1116,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
         return;
       }
+
+      isDescend = params.has("isDescend") ? params.getBoolean("isDescend") : false;
 
       from = params.getInt("from");
       limit = params.getInt("limit");
@@ -1141,6 +1144,10 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       }
     } else {
       messageList = conversation.getMessagesFromNewest(from, limit);
+    }
+
+    if (!isDescend) {
+      Collections.reverse(messageList);
     }
 
     ArrayList messageJSONArr = new ArrayList();
