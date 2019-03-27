@@ -788,7 +788,8 @@ JMessage.retractMessage(
 JMessage.getHistoryMessages(
   type: kMockUser,
   from: 0,
-  limit: 10 
+  limit: 10,
+  isDescend: false
 );
 ```
 
@@ -800,6 +801,7 @@ JMessage.getHistoryMessages(
 
 - limit: 消息数。当 from = 0 并且 limit = -1 时，返回所有的历史消息。
 
+- isDescend: 是否降序（消息时间戳从大到小排序），默认为 false。
   ​
 
 ### downloadOriginalImage

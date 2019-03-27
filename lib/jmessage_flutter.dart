@@ -614,12 +614,14 @@ class JmessageFlutter {
     @required dynamic type, /// (JMSingle | JMGroup)
     @required int from,
     @required int limit,
+    bool isDescend = false
   }) async {
     Map param = type.toJson();
     
     param..addAll({
       'from': from,
       'limit': limit,
+      'isDescend': isDescend
       });
 
     List resArr = await _channel.invokeMethod('getHistoryMessages', 
@@ -2120,11 +2122,13 @@ class JMConversationInfo {
   Future<List> getHistoryMessages({
     @required int from,
     @required int limit,
+    bool isDescend = false
   }) async {
     List msgs = await JmessageFlutter().getHistoryMessages(
       type: target.targetType,
       from: from,
-      limit: limit
+      limit: limit,
+      isDescend: isDescend
     );
     return msgs;
   }
