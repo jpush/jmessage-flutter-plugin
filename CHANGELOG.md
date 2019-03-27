@@ -1,3 +1,6 @@
+## 0.0.13
+ feature: getHistoryMessages parameters add isDescend-option.
+
 ## 0.0.12
  feature: onLoginStateChanged add user_kicked event.
 
