@@ -1767,7 +1767,7 @@ class JMContactNotifyEvent {
   JMContactNotifyEvent.fromJson(Map<dynamic, dynamic> json)
     : type = getEnumFromString(JMContactNotifyType.values, json['type']),
       reason = json['reason'],
-      fromUserName = json['fromUserName'],
+      fromUserName = json['fromUsername'],
       fromUserAppKey = json['fromUserAppKey'];
 }
 
