@@ -1136,14 +1136,14 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       isDescend = [number boolValue];
     }
     
-    NSArray *messageList = [conversation messageArrayFromNewestWithOffset:param[@"from"] limit:limit];
+    NSArray *messageList = [conversation messageArrayFromNewestWithOffset:param[@"from"] limit:limit]; // 降序
     
     NSArray *messageDicArr = [messageList mapObjectsUsingBlock:^id(id obj, NSUInteger idx) {
       JMSGMessage *message = obj;
       return [message messageToDictionary];
     }];
     
-    if (isDescend) {
+    if (!isDescend) {
       messageDicArr = [[messageDicArr reverseObjectEnumerator] allObjects];
     }
     

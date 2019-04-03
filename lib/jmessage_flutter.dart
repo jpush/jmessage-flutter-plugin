@@ -327,11 +327,19 @@ class JmessageFlutter {
 
   Future<void> updateMyInfo({ 
     int birthday,
+    String nickname,
+    String signature,
+    String region,
+    String address,
     JMGender gender,
     Map<dynamic, dynamic> extras
   }) async {
     await _channel.invokeMethod('updateMyInfo', {
         'birthday': birthday,
+        'nickname':nickname,
+        'signature':signature,
+        'region':region,
+        'address':address,
         'gender': getStringFromEnum(gender),
         'extras': extras,
       }..removeWhere((key,value) => value == null));

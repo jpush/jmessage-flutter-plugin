@@ -1137,10 +1137,11 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
     if (limit == -1) { // 意味着要获得从 from 开始的所有消息。
       if (from == 0) {
-        messageList = conversation.getAllMessage();
+        messageList = conversation.getAllMessage();// 按时间升序
+        Collections.reverse(messageList);// 按时间降序
       } else {
         int messageCount = conversation.getAllMessage().size() - from;
-        messageList = conversation.getMessagesFromNewest(from, messageCount);
+        messageList = conversation.getMessagesFromNewest(from, messageCount); // 按时间降序
       }
     } else {
       messageList = conversation.getMessagesFromNewest(from, limit);
