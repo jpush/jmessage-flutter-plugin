@@ -1,3 +1,10 @@
+## 0.0.15
+  fix:
+    1.修复getHistoryMessages 安卓和ios的消息排序不一致
+    2.修复updateMyInfo 的参数缺失问题。
+## 0.0.14
+ fix: contact event username is null bug
+
 ## 0.0.13
  feature: getHistoryMessages parameters add isDescend-option.
 
