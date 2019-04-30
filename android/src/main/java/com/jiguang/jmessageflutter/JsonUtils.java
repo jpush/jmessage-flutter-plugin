@@ -56,20 +56,17 @@ class JsonUtils {
         return map;
     }
 
-    static JSONObject toJson(Map<String, String> map) {
+    static HashMap toJson(Map<String, String> map) {
+        HashMap result = new HashMap<String, Object>();
         Iterator<String> iterator = map.keySet().iterator();
 
-        JSONObject jsonObject = new JSONObject();
+//        JSONObject jsonObject = new JSONObject();
         while (iterator.hasNext()) {
             String key = iterator.next();
 
-            try {
-                jsonObject.put(key, map.get(key));
-            } catch (JSONException e) {
-                Log.wtf("RequestManager", "Failed to put value for " + key + " into JSONObject.", e);
-            }
+            result.put(key, map.get(key));
         }
-        return jsonObject;
+        return result;
     }
 
     static HashMap toJson(final UserInfo userInfo) {

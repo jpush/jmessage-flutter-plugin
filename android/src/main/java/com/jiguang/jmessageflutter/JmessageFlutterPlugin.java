@@ -2221,6 +2221,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   private void exitConversation(MethodCall call, Result result) {
     JMessageClient.exitConversation();
+    result.success(null);
   }
 
   private void getConversation(MethodCall call, Result result) {

@@ -35,6 +35,6 @@ android {
 }
 
 dependencies {
-    implementation 'cn.jiguang.sdk:jmessage:2.8.0'
+    implementation 'cn.jiguang.sdk:jmessage:2.8.2'
     implementation 'cn.jiguang.sdk:jcore:1.2.6'
 }

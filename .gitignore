@@ -6,4 +6,5 @@
 pubspec.lock
 
 build/
-.idea
+.idea/
+flutter.jar

@@ -1,3 +1,9 @@
+## 0.0.16
+ fix:
+    1、修复发送自定义消息解析失败的bug
+    2、修复安卓端exitConversation没有回调的问题。
+    3、升级安卓端JMessage sdk版本2.8.2
+
 ## 0.0.15
   fix:
     1.修复getHistoryMessages 安卓和ios的消息排序不一致
