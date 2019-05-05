@@ -967,7 +967,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       }
 
       CustomContent content = new CustomContent();
-      content.setAllValues(fromJson(customObject));
+      //content.setAllValues(fromJson(customObject));
+	  content.setExtras(fromJson(customObject.getJSONObject("extra")));
       sendMessage(conversation, content, options, result);
     } catch (JSONException e) {
       e.printStackTrace();
