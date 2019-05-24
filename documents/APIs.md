@@ -48,6 +48,8 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [sendFileMessage](#sendfilemessage)
   - [retractMessage](#retractmessage)
   - [getHistoryMessages](#gethistorymessages)
+  - [getMessageById](#getMessageById)
+  - [deleteMessageById](#deleteMessageById)
   - [downloadOriginalImage](#downloadoriginalimage)
   - [downloadThumbImage](#downloadthumbimage)
   - [downloadVoiceFile](#downloadvoicefile)
@@ -802,6 +804,46 @@ JMessage.getHistoryMessages(
 - limit: 消息数。当 from = 0 并且 limit = -1 时，返回所有的历史消息。
 
 - isDescend: 是否降序（消息时间戳从大到小排序），默认为 false。
+
+
+### getMessageById
+
+通过消息Id获取消息对象。
+
+#### 示例
+
+```dart
+var message = await jmessage.getMessageById(
+type: kMockUser,
+messageId: msg.id
+);
+```
+
+#### 参数说明
+
+- type: 会话类型。可以为 (JMSingle | JMGroup | JMChatRoom)。
+
+- messageId: 消息id。
+
+### deleteMessageById
+
+通过消息Id删除消息。
+
+#### 示例
+
+```dart
+await jmessage.deleteMessageById(
+type: kMockUser,
+messageId: msg.id
+);
+```
+
+#### 参数说明
+
+- type: 会话类型。可以为 (JMSingle | JMGroup | JMChatRoom)。
+
+- messageId: 消息id。
+
   ​
 
 ### downloadOriginalImage
