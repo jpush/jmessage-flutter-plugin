@@ -37,6 +37,10 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [updateGroupInfo](#updategroupinfo)
   - [addGroupMembers](#addgroupmembers)
   - [removeGroupMembers](#removegroupmembers)
+  - [setGroupMemberSilence](#setGroupMemberSilence)
+  - [groupSilenceMembers](#groupSilenceMembers)
+  - [setGroupNickname](#setGroupNickname)
+  - [exitGroup](#exitGroup)
 - [聊天](#聊天)
   - [createMessage](#createmessage)
   - [sendMessage](#sendmessage)
@@ -52,6 +56,12 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [downloadThumbImage](#downloadthumbimage)
   - [downloadVoiceFile](#downloadvoicefile)
   - [downloadFile](#downloadfile)
+  - [setNoDisturb](#setNoDisturb)
+  - [getNoDisturbList](#getNoDisturbList)
+  - [setNoDisturbGlobal](#setNoDisturbGlobal)
+  - [isNoDisturbGlobal](#isNoDisturbGlobal)
+  - [blockGroupMessage](#blockGroupMessage)
+  - [getBlockedGroupList](#getBlockedGroupList)
 - [会话](#会话)
   - [createConversation](#createconversation)
   - [deleteConversation](#deleteconversation)
@@ -77,6 +87,8 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [removeFromFriendList](#removefromfriendlist)
   - [updateFriendNoteName](#updatefriendnotename)
   - [updateFriendNoteText](#updatefriendnotetext)
+  - [addUsersToBlacklist](#addUsersToBlacklist)
+  - [removeUsersFromBlacklist](#removeUsersFromBlacklist)
 - [事件监听]()
   - [消息事件](#addreceivemessagelistener)
     - [addReceiveMessageListener](#addreceivemessagelistener)
@@ -450,6 +462,88 @@ await JMessage.removeGroupMembers(
 - id : 指定操作的群 groupId
 - username : 被添加的的用户名数组。
 - appKey: 被添加用户所属应用的 AppKey。如果不填，默认为当前应用。
+
+
+### setGroupMemberSilence
+
+设置群成员禁言
+
+#### 示例
+
+```dart
+await jmessage.setGroupMemberSilence(
+groupId: kMockGroupId,
+isSilence: true,
+username: '0002',
+);
+
+isSilenceMember = await jmessage.isSilenceMember(
+groupId: kMockGroupId,
+username: '0002'
+);
+```
+
+#### 参数说明
+
+- groupId : 指定操作的群 groupId
+- isSilence : true：禁言 false：取消禁言 。
+- username : 需要禁言的用户 。
+- appKey: 被添加用户所属应用的 AppKey。如果不填，默认为当前应用。
+
+
+### groupSilenceMembers
+
+获取群成员禁言列表
+
+#### 示例
+
+```dart
+List members = await jmessage.groupSilenceMembers(groupId: kMockGroupId);
+```
+
+#### 参数说明
+
+- groupId : 指定操作的群 groupId
+
+
+### setGroupNickname
+
+设置群成员昵称
+
+#### 示例
+
+```dart
+const String kMockgroupNickName = 'newGroupMemberNickName';
+await jmessage.setGroupNickname(
+groupId: kMockGroupId,
+username: '0002',
+nickName: kMockgroupNickName
+);
+
+```
+
+#### 参数说明
+
+- groupId : 指定操作的群 groupId
+- username : 群成员名称
+- nickName : 昵称
+
+
+### exitGroup
+
+退出群组
+
+#### 示例
+
+```dart
+await jmessage.exitGroup(
+ id: kMockGroupId
+  );
+```
+
+#### 参数说明
+
+- id : 指定操作的群 groupId
 
 ### addGroupAdmins
 
@@ -893,6 +987,93 @@ Map resJson = await JMessage.downloadFile(
 - type: 会话类型。可以为 (JMSingle | JMGroup)。
 - messageId: 文件消息 id。
 
+### setNoDisturb
+
+消息免打扰，不会弹出默认的通知提示，但消息事件照常下发。
+
+#### 示例
+
+```dart
+await jmessage.setNoDisturb(
+target: kMockUser,
+isNoDisturb: true
+);
+```
+
+#### 参数说明
+
+- type: 会话类型。可以为 (JMSingle | JMGroup)。
+- isNoDisturb: 为true开启免打扰。
+
+
+### getNoDisturbList
+
+获取免打扰列表。
+
+#### 示例
+
+```dart
+Map res = await jmessage.getNoDisturbList();
+```
+
+
+### setNoDisturbGlobal
+
+设置全局免打扰，收到所有消息都将不会有通知栏通知。
+
+#### 示例
+
+```dart
+await jmessage.setNoDisturbGlobal(isNoDisturb: true);
+```
+
+#### 参数说明
+
+- isNoDisturb: 为true开启免打扰。
+
+
+### isNoDisturbGlobal
+
+获取是否开启全局免打扰。
+
+#### 示例
+
+```dart
+bool isNoDisturb = await jmessage.isNoDisturbGlobal();
+```
+
+
+### blockGroupMessage
+
+群消息屏蔽。
+
+#### 示例
+
+```dart
+await jmessage.blockGroupMessage(
+id: kMockGroupId,
+isBlock: true
+);
+res = await jmessage.isGroupBlocked(id: kMockGroupId);
+```
+
+#### 参数说明
+
+- id: 群组id。
+- isBlock: true：屏蔽 false：不屏蔽。
+
+
+### getBlockedGroupList
+
+获取当前用户的群屏蔽列表。
+
+#### 示例
+
+```dart
+List groups = await jmessage.getBlockedGroupList();
+```
+
+
 ## 会话
 
 ### createConversation
@@ -1194,6 +1375,43 @@ await JMessage.updateFriendNoteText(
 - username: 好友的用户名。
 - appKey: 好友所属应用的 AppKey，如果为空默认为当前应用。
 - noteText: 备注名。长度要求为 0 ~ 250 Byte。
+
+
+### addUsersToBlacklist
+
+批量将用户加入黑名单。
+
+#### 示例
+
+```dart
+addUsersToBlacklist
+await jmessage.addUsersToBlacklist(
+usernameArray: ['username'],
+);
+```
+
+#### 参数说明
+
+- usernameArray: 待拉黑好友的用户名数组。
+
+
+### removeUsersFromBlacklist
+
+批量将用户移出黑名单。
+
+#### 示例
+
+```dart
+await jmessage.removeUsersFromBlacklist(
+usernameArray: ['username'],
+);
+```
+
+#### 参数说明
+
+- usernameArray: 用户名数组。
+
+
 
 ## 事件监听
 
