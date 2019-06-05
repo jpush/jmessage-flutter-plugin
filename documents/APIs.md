@@ -812,7 +812,7 @@ JMessage.getHistoryMessages(
 
 ```dart
 JMessage.downloadOriginalImage(
-  type: kMockUser, 
+  target: kMockUser, 
   messageId: 'target_msg_id' 
   });
 ```
@@ -830,7 +830,7 @@ JMessage.downloadOriginalImage(
 
 ```dart
 Map resJson = await JMessage.downloadThumbImage(
-  type: kMockUser,
+  target: kMockUser,
   messageId: 'target_msg_id' 
   });
   
