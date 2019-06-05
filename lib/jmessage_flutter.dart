@@ -394,6 +394,7 @@ class JmessageFlutter {
     @required dynamic targetType, /// (JMSingle | JMGroup | JMChatRoom)
     String text,
     String path,
+    String fileName,
     Map<dynamic, dynamic> customObject,
     int latitude,
     int longitude,
@@ -413,6 +414,7 @@ class JmessageFlutter {
       'messageType': getStringFromEnum(type),
       'text': text,
       'path': path,
+      'fileName':fileName,
       'customObject': customObject,
       'latitude': latitude,
       'longitude': longitude,
