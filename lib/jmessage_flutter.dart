@@ -16,6 +16,25 @@ String getStringFromEnum<T>(T) {
   return T.toString().split('.').last;
 }
 
+/// iOS 通知设置项
+class JMNotificationSettingsIOS {
+  final bool sound;
+  final bool alert;
+  final bool badge;
+
+  const JMNotificationSettingsIOS ({
+    this.sound = true,
+    this.alert = true,
+    this.badge = true,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, bool>{'sound': sound, 'alert': alert, 'badge': badge};
+  }
+}
+
+/// 点击通知栏
+
 // message 和 retractedMessage 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMEventMessage | JMCustomMessage;
 typedef JMMessageEventListener = void Function(dynamic message);
 typedef JMSyncOfflineMessageListener = void Function(JMConversationInfo conversation, List<dynamic> messageArray);
@@ -248,6 +267,33 @@ class JmessageFlutter {
     _channel.invokeMethod('setDebugMode', {'enable': enable});
   }
 
+  ///
+  /// 申请推送权限，注意这个方法只会向用户弹出一次推送权限请求（如果用户不同意，之后只能用户到设置页面里面勾选相应权限），需要开发者选择合适的时机调用。
+  ///
+  void applyPushAuthority([JMNotificationSettingsIOS iosSettings = const JMNotificationSettingsIOS()]) {
+
+    if (!_platform.isIOS) {
+      return;
+    }
+    print("注册通知--001");
+    _channel.invokeMethod('applyPushAuthority', iosSettings.toMap());
+  }
+
+  ///
+  /// iOS Only
+  /// 设置应用 Badge（小红点）
+  ///
+  /// @param {Int} badge
+  ///
+  Future<void> setBadge({
+    @required int badge
+  }) async {
+    await _channel.invokeMethod('setBadge', {
+      'badge': badge
+    });
+    return;
+  }
+
   Future<void> userRegister({
       @required String username, 
       @required String password, 
@@ -280,14 +326,7 @@ class JmessageFlutter {
     return;
   }
 
-  Future<void> setBadge({
-    @required int badge
-  }) async {
-    await _channel.invokeMethod('setBadge', {
-      'badge': badge
-    });
-    return;
-  }
+
 
   Future<JMUserInfo> getMyInfo() async {
     Map userJson = await _channel.invokeMethod('getMyInfo');
@@ -1439,7 +1478,7 @@ class JMMessageSendOptions {
   }
 
   JMMessageSendOptions.fromJson(Map<dynamic, dynamic> json)
-    : isShowNotification = json['roomId'],
+    : isShowNotification = json['isShowNotification'],
       isRetainOffline = json['isRetainOffline'],
       isCustomNotificationEnabled = json['isCustomNotificationEnabled'],
       notificationTitle = json['notificationTitle'],

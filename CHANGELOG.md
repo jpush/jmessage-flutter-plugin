@@ -1,3 +1,8 @@
+## 0.0.18
+fix:
+    1、添加 iOS 端 apns 注册方法
+    2、修复：Android 端 serverMessageId 超过 int 存储范围问题；
+    3、更新到最新版本 JMessage SDK
 ## 0.0.17
  fix:
     1、修复IOS发送文件消息获取不到文件问题
