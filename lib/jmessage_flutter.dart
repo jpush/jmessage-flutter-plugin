@@ -166,6 +166,7 @@ class JmessageFlutter {
     }
     
     Future<void> _handleMethod(MethodCall call) async {
+      print("handleMethod ");
       switch (call.method) {
         case 'onReceiveMessage':
           for (JMMessageEventListener cb in _eventHanders.receiveMessage) {

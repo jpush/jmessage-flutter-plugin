@@ -2727,7 +2727,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 消息事件。
    */
-  public void onEvent(MessageEvent event) {
+  public void onEventMainThread(MessageEvent event) {
+
     HashMap msgJson = toJson(event.getMessage());
 
     JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveMessage", msgJson);
@@ -2738,7 +2739,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 通知栏点击事件。
    */
-  public void onEvent(NotificationClickEvent event) {
+  public void onEventMainThread(NotificationClickEvent event) {
     // 点击通知启动应用。
 
 
@@ -2758,7 +2759,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 离线消息事件。
    */
-  public void onEvent(OfflineMessageEvent event) {
+  public void onEventMainThread(OfflineMessageEvent event) {
     final HashMap json = new HashMap();
     json.put("conversation", toJson(event.getConversation()));
 
@@ -2833,7 +2834,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 漫游消息同步事件。
    */
-  public void onEvent(ConversationRefreshEvent event)  {
+  public void onEventMainThread(ConversationRefreshEvent event)  {
 //    TODO:
     if (event.getReason() == ConversationRefreshEvent.Reason.MSG_ROAMING_COMPLETE) {
       HashMap json = new HashMap();
@@ -2870,7 +2871,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 用户登录状态变更事件。
    */
-  public void onEvent(LoginStateChangeEvent event) throws JSONException {
+  public void onEventMainThread(LoginStateChangeEvent event) throws JSONException {
     HashMap json = new HashMap();
     json.put("type", event.getReason().toString());
 
@@ -2882,7 +2883,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 联系人相关通知事件。
    */
-  public void onEvent(ContactNotifyEvent event) throws JSONException {
+  public void onEventMainThread(ContactNotifyEvent event) throws JSONException {
     HashMap json = new HashMap();
     json.put("type", event.getType().toString());
     json.put("reason", event.getReason());
@@ -2897,7 +2898,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 消息撤回事件。
    */
-  public void onEvent(MessageRetractEvent event) throws JSONException {
+  public void onEventMainThread(MessageRetractEvent event) throws JSONException {
     HashMap json = new HashMap();
     json.put("conversation", toJson(event.getConversation()));
     json.put("retractedMessage", toJson(event.getRetractedMessage()));
@@ -2910,7 +2911,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 透传消息事件。
    */
-  public void onEvent(CommandNotificationEvent event) {
+  public void onEventMainThread(CommandNotificationEvent event) {
     final HashMap result = new HashMap();
     result.put("content", event.getMsg());
 
@@ -2946,7 +2947,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   /**
    * 处理聊天室消息事件。
    */
-  public void onEvent(ChatRoomMessageEvent event) {
+  public void onEventMainThread(ChatRoomMessageEvent event) {
     ArrayList jsonArr = new ArrayList<>();
 
     for (Message msg : event.getMessages()) {
@@ -2959,7 +2960,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   /**
    * 监听接收入群申请事件
    */
-  public void onEvent(GroupApprovalEvent event) throws JSONException {
+  public void onEventMainThread(GroupApprovalEvent event) throws JSONException {
     Log.d(TAG, "GroupApprovalEvent, event: " + event);
     groupApprovalEventHashMap.put(event.getEventId() + "", event);
     GroupApprovalEvent.Type type = event.getType();
@@ -2990,7 +2991,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   /**
    * 监听管理员同意入群申请事件
    */
-  public void onEvent(GroupApprovedNotificationEvent event) {
+  public void onEventMainThread(GroupApprovedNotificationEvent event) {
     Log.d(TAG, "GroupApprovedNotificationEvent, event: " + event);
     final HashMap json = new HashMap();
     json.put("isAgree", event.getApprovalResult());
@@ -3019,7 +3020,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   /**
    * 监听管理员拒绝入群申请事件
    */
-  public void onEvent(GroupApprovalRefuseEvent event) {
+  public void onEventMainThread(GroupApprovalRefuseEvent event) {
     Log.d(TAG, "GroupApprovalRefuseEvent, event: " + event);
     final HashMap json = new HashMap();
     json.put("reason", event.getReason());
