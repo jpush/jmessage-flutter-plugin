@@ -6,7 +6,7 @@ import 'package:jmessage_flutter/jmessage_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
-const String kMockAppkey = '31c7c1b2cf59c1d42895a782';
+const String kMockAppkey =  '你自己应用的 AppKey';
 const String kMockUserName = '0001';
 const String kMockPassword = '1111';
 
@@ -55,6 +55,13 @@ class _MyAppState extends State<MyApp> {
     
     jmessage..setDebugMode(enable: true);
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
+    jmessage.applyPushAuthority(
+        new JMNotificationSettingsIOS(
+            sound: true,
+            alert: true,
+            badge: true)
+    );
+
     // testAPIs();
     // testMediaAPis();s
     // print('setup jmessage');
@@ -74,6 +81,13 @@ class _MyAppState extends State<MyApp> {
     await jmessage.userRegister(username: "0002", password: kMockPassword,nickname: "shikk2");
     await jmessage.login(username: "0002", password: kMockPassword);
     await jmessage.updateMyInfo(gender: JMGender.male,extras: {"realName":"0002","age:":2,"student":true});
+  }
+
+  void loginUser1() async {
+    await jmessage.login(username: "0001", password: kMockPassword);
+  }
+  void loginUser2() async {
+    await jmessage.login(username: "0002", password: kMockPassword);
   }
 
   void getUserinfo(){
@@ -964,31 +978,38 @@ class _MyAppState extends State<MyApp> {
         appBar: new AppBar(
           title: const Text('JMessage Plugin App'),
         ),
-        body: new Column(
-          children: <Widget>[
-            new Text('Running Unit test... \n'),
-            new FlatButton(onPressed: (){
-              register1();
-            }, child: new Text("0001 测试注册用户")),
-            new FlatButton(onPressed: (){
-              testGetHistorMessage();
-            }, child: new Text("0001 获取收到的历史消息")),
-            new FlatButton(onPressed: (){
-              addListener();
-            }, child: new Text("0001 添加消息监听")),
-            new Text('============================== \n'),
-            new FlatButton(onPressed: (){
-              register2();
-            }, child: new Text("0002 测试注册用户")),
-            new FlatButton(onPressed: (){
-              testSendCustomMsg();
-            }, child: new Text("0002 测试向0001 发送自定义消息")),
-            new FlatButton(onPressed: (){
-              testSendTextMsg();
-            }, child: new Text("0002 测试向0001 发送文字消息")),
-
-
-          ],
+        body: new Center(
+          child: new Column(
+            children: <Widget>[
+              new Text('Running Unit test... \n'),
+              new FlatButton(onPressed: (){
+                register1();
+              }, child: new Text("0001 测试注册用户")),
+              new FlatButton(onPressed: () {
+                loginUser1();
+              }, child: new Text("0001 登录")),
+              new FlatButton(onPressed: (){
+                testGetHistorMessage();
+              }, child: new Text("0001 获取收到的历史消息")),
+              new Text('============================== \n'),
+              new FlatButton(onPressed: (){
+                register2();
+              }, child: new Text("0002 测试注册用户")),
+              new FlatButton(onPressed: () {
+                loginUser2();
+              }, child: new Text("0002 登录")),
+              new FlatButton(onPressed: (){
+                testSendCustomMsg();
+              }, child: new Text("0002 测试向0001 发送自定义消息")),
+              new FlatButton(onPressed: (){
+                testSendTextMsg();
+              }, child: new Text("0002 测试向0001 发送文字消息")),
+              new Text('============================== \n'),
+              new FlatButton(onPressed: (){
+                addListener();
+              }, child: new Text("添加消息监听")),
+            ],
+          ),
         ),
       ),
     );

@@ -24,12 +24,12 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 @implementation JmessageFlutterPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  FlutterMethodChannel* channel = [FlutterMethodChannel
-      methodChannelWithName:@"jmessage_flutter"
-            binaryMessenger:[registrar messenger]];
-  JmessageFlutterPlugin* instance = [[JmessageFlutterPlugin alloc] init];
-  instance.channel = channel;
-  [registrar addMethodCallDelegate:instance channel:channel];
+    FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"jmessage_flutter" binaryMessenger:[registrar messenger]];
+    JmessageFlutterPlugin* instance = [[JmessageFlutterPlugin alloc] init];
+    instance.channel = channel;
+    
+    [registrar addApplicationDelegate:instance];
+    [registrar addMethodCallDelegate:instance channel:channel];
 }
 
 - (instancetype)init {
@@ -315,14 +315,16 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self setup:call result:result];
   } else if([@"setDebugMode" isEqualToString:call.method]) {
     [self setDebugMode:call result:result];
+  } else if([@"applyPushAuthority" isEqualToString:call.method]) {
+      [self applyPushAuthority:call result:result];
+  } else if([@"setBadge" isEqualToString:call.method]) {
+      [self setBadge:call result:result];
   } else if([@"userRegister" isEqualToString:call.method]) {
     [self userRegister:call result:result];
   } else if([@"login" isEqualToString:call.method]) {
     [self login:call result:result];
   } else if([@"logout" isEqualToString:call.method]) {
     [self logout:call result:result];
-  } else if([@"setBadge" isEqualToString:call.method]) {
-    [self setBadge:call result:result];
   } else if([@"getMyInfo" isEqualToString:call.method]) {
     [self getMyInfo:call result:result];
   } else if([@"getUserInfo" isEqualToString:call.method]) {
@@ -540,6 +542,39 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }
 }
 
+- (void)applyPushAuthority:(FlutterMethodCall*)call result:(FlutterResult)result {
+
+    BOOL isAboveIos8 = NO;
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
+        isAboveIos8 = YES;
+    }
+    NSDictionary *arguments = call.arguments;
+    UIUserNotificationType types = 0;
+    if ([arguments[@"sound"] boolValue]) {
+        types |= isAboveIos8 ? UIUserNotificationTypeSound : UIRemoteNotificationTypeSound;
+    }
+    if ([arguments[@"alert"] boolValue]) {
+        types |= isAboveIos8 ? UIUserNotificationTypeAlert : UIRemoteNotificationTypeAlert;
+    }
+    if ([arguments[@"badge"] boolValue]) {
+        types |= isAboveIos8 ? UIUserNotificationTypeBadge : UIRemoteNotificationTypeBadge;
+    }
+    [JMessage registerForRemoteNotificationTypes:types categories:nil];
+}
+
+- (void)setBadge:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSDictionary *param = call.arguments;
+    NSNumber *badge = param[@"badge"];
+    
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge.integerValue];
+    [JMessage setBadge:badge.integerValue > 0 ? badge.integerValue: 0];
+    result(nil);
+}
+
+- (void)clearAllNotifications:(FlutterMethodCall*)call result:(FlutterResult)result {
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber: 0];
+}
+
 - (void)userRegister:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
   
@@ -624,11 +659,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }];
 }
 
-- (void)setBadge:(FlutterMethodCall*)call result:(FlutterResult)result {
-  NSDictionary *param = call.arguments;
-  [JMessage setBadge:[param[@"badge"] integerValue]];
-  result(nil);
-}
+
 
 
 - (void)getMyInfo:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -2391,19 +2422,21 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 #pragma mark - AppDelegate
 
-- (BOOL)application:(UIApplication *)application
-didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.launchOptions = launchOptions;
-  return YES;
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    self.launchOptions = launchOptions;
+    
+    return YES;
 }
-
-
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    application.applicationIconBadgeNumber = 0;
+}
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    [JMessage registerDeviceToken:deviceToken];
+}
 
 #pragma mark - JMessage Event
 
 - (void)onReceiveMessage:(JMSGMessage *)message error:(NSError *)error{
-  NSMutableDictionary *dict = [NSMutableDictionary new];
-  
   [_channel invokeMethod:@"onReceiveMessage" arguments: [message messageToDictionary]];
 }
 
@@ -2604,6 +2637,9 @@ didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
 - (void)onSendMessageResponse:(JMSGMessage *)message error:(NSError *)error {
 
+    if (!error) {
+        NSLog(@"消息发送成功：%@",message.serverMessageId);
+    }
   FlutterResult result = self.SendMsgCallbackDic[message.msgId];
   if (error) {
     result([error flutterError]);
