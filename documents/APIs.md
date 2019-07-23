@@ -11,6 +11,7 @@ JmessageFlutter JMessage = JmessageFlutter();
   - [init](#init)
   - [setDebugMode](#setdebugmode)
   - [setBadge](#setbadge)
+  - [applyPushAuthority](#applyPushAuthority)
 - [用户登录、注册及属性维护](#用户登录注册及属性维护)
   - [userRegister](#userregister)
   - [login](#login)
@@ -155,6 +156,21 @@ JMessage.setDebugMode( enable: true );
 
 ```dart
 await JMessage.setBadge(badge: 5);
+```
+
+### applyPushAuthority
+
+iOS 端注册 apns 通知
+
+#### 示例
+
+```dart
+jmessage.applyPushAuthority(
+        new JMNotificationSettingsIOS(
+            sound: true,
+            alert: true,
+            badge: true)
+    );
 ```
 
 ## 用户登录、注册及属性维护
