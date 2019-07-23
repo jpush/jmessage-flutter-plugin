@@ -590,8 +590,8 @@ class JmessageFlutter {
 
   Future<JMLocationMessage> sendLocationMessage({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
-    @required int latitude,
-    @required int longitude,
+    @required double latitude,
+    @required double longitude,
     @required num scale,
     String address,
     JMMessageSendOptions sendOption,
