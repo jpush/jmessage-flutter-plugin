@@ -166,6 +166,7 @@ class JmessageFlutter {
     }
     
     Future<void> _handleMethod(MethodCall call) async {
+      print("handleMethod ");
       switch (call.method) {
         case 'onReceiveMessage':
           for (JMMessageEventListener cb in _eventHanders.receiveMessage) {
@@ -589,8 +590,8 @@ class JmessageFlutter {
 
   Future<JMLocationMessage> sendLocationMessage({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
-    @required int latitude,
-    @required int longitude,
+    @required double latitude,
+    @required double longitude,
     @required num scale,
     String address,
     JMMessageSendOptions sendOption,

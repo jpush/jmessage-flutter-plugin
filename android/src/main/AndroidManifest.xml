@@ -1,3 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.jiguang.jmessageflutter">
+    <application>
+        <service android:name="com.jiguang.jmessageflutter.PushService"
+            android:process=":pushcore">
+            <intent-filter>
+                <action android:name="cn.jiguang.user.service.action" />
+            </intent-filter>
+        </service>
+    </application>
 </manifest>

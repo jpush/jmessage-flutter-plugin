@@ -2428,7 +2428,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     return YES;
 }
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    application.applicationIconBadgeNumber = 0;
+    
 }
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     [JMessage registerDeviceToken:deviceToken];
