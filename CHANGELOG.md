@@ -1,3 +1,6 @@
+## 0.0.20
+fix:
+    1、修改： sendLocationMessage 方法经纬度参数改为 double 类型
 ## 0.0.19
 fix:
     1、修复：Android 接收消息时 flutter 没回调问题

@@ -2135,8 +2135,8 @@ class JMConversationInfo {
   }
   // sendLocation
   Future<JMLocationMessage> sendLocationMessage({
-    @required int latitude,
-    @required int longitude,
+    @required double latitude,
+    @required double longitude,
     @required num scale,
     String address,
     JMMessageSendOptions sendOption,
