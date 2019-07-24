@@ -150,7 +150,7 @@ class JMessageUtils {
             }
 
             String messageId = params.getString("messageId");
-            return conversation.getMessage(Long.parseLong(messageId);
+            return conversation.getMessage(Long.parseLong(messageId));
 
         } else if (params.has("id")) { // 代表 JS 层传入的是 Message 对象。
             return JsonToMessage(params);

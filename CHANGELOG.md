@@ -1,3 +1,8 @@
+## 0.0.19
+fix:
+    1、修复：Android 接收消息时 flutter 没回调问题
+    2、适配 Android 最新 SDK
+    3、修改代码书写错误
 ## 0.0.18
 fix:
     1、添加 iOS 端 apns 注册方法
