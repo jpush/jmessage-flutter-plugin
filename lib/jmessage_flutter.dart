@@ -166,7 +166,7 @@ class JmessageFlutter {
     }
     
     Future<void> _handleMethod(MethodCall call) async {
-      print("handleMethod ");
+      print("handleMethod method = ${call.method}");
       switch (call.method) {
         case 'onReceiveMessage':
           for (JMMessageEventListener cb in _eventHanders.receiveMessage) {
@@ -188,7 +188,15 @@ class JmessageFlutter {
           for (JMSyncOfflineMessageListener cb in _eventHanders.syncOfflineMessage) {
             Map param = call.arguments.cast<dynamic, dynamic>();
             List msgDicArray = param['messageArray'];
-            List<dynamic> msgs = msgDicArray.map((json) => JMNormalMessage.generateMessageFromJson(json)).toList();
+//            List<dynamic> msgs = msgDicArray.map((json) => JMNormalMessage.generateMessageFromJson(json)).toList();
+
+            List<dynamic> msgs = [];
+            for (Map json in msgDicArray) {
+              print("offline message: ${json.toString()}");
+              JMNormalMessage normsg = JMNormalMessage.generateMessageFromJson(json);
+              msgs.add(normsg);
+            }
+
             cb(JMConversationInfo.fromJson(param['conversation']), msgs);
           }
           break;
@@ -227,7 +235,8 @@ class JmessageFlutter {
         case 'onReceiveApplyJoinGroupApproval':
           for (JMReceiveApplyJoinGroupApprovalListener cb in _eventHanders.receiveApplyJoinGroupApproval) {
             Map json = call.arguments.cast<dynamic, dynamic>();
-            cb(JMReceiveApplyJoinGroupApprovalEvent.fromJson(json));
+            JMReceiveApplyJoinGroupApprovalEvent e = JMReceiveApplyJoinGroupApprovalEvent.fromJson(json);
+            cb(e);
           }
           break;
         case 'onReceiveGroupAdminReject':
@@ -276,7 +285,6 @@ class JmessageFlutter {
     if (!_platform.isIOS) {
       return;
     }
-    print("注册通知--001");
     _channel.invokeMethod('applyPushAuthority', iosSettings.toMap());
   }
 
@@ -300,6 +308,7 @@ class JmessageFlutter {
       @required String password, 
       String nickname
     }) async {
+      print("Action - userRegister: username=$username,pw=$password");
       await _channel.invokeMethod('userRegister', {
         'username': username,
         'password': password,
@@ -307,7 +316,7 @@ class JmessageFlutter {
       });
     }
 
-  Future<void> login({
+  Future<JMUserInfo> login({
     @required String username,
     @required String password,
   }) async {
@@ -315,11 +324,19 @@ class JmessageFlutter {
         password == null) {
       throw("username or password was passed null");
     }
-    await _channel.invokeMethod('login', {
+    print("Action - login: username=$username,pw=$password");
+
+    Map userJson = await _channel.invokeMethod('login', {
       'username': username,
       'password': password
     });
-    return;
+    if (userJson == null) {
+      return null;
+    }else{
+      return JMUserInfo.fromJson(userJson);
+    }
+
+
   }
 
   Future<void> logout() async {
@@ -331,7 +348,12 @@ class JmessageFlutter {
 
   Future<JMUserInfo> getMyInfo() async {
     Map userJson = await _channel.invokeMethod('getMyInfo');
-    return JMUserInfo.fromJson(userJson);
+    if (userJson == null) {
+      return null;
+    }else{
+      return JMUserInfo.fromJson(userJson);
+    }
+
   }
 
   Future<JMUserInfo> getUserInfo({
@@ -436,15 +458,13 @@ class JmessageFlutter {
     String path,
     String fileName,
     Map<dynamic, dynamic> customObject,
-    int latitude,
-    int longitude,
+    double latitude,
+    double longitude,
     num scale,
     String address,
     Map<dynamic, dynamic> extras,
   }) async {
     Map param = targetType.toJson();
-    
-    
     
     if (extras != null) {
       param..addAll({'extras': extras});
@@ -651,8 +671,10 @@ class JmessageFlutter {
     @required String messageId,
   }) async {
     Map param = type.toJson();
-    
+
     param..addAll({'messageId': messageId});
+
+    print("retractMessage: ${param.toString()}");
 
     await _channel.invokeMethod('retractMessage', 
       param..removeWhere((key,value) => value == null));
@@ -1909,7 +1931,7 @@ class JMGroupInfo {
   int level;  // 群组等级，默认等级 4
   String owner; // 群主的 username
   String ownerAppKey; // 群主的 appKey
-  int maxMemberCount; // 最大成员数
+  String maxMemberCount; // 最大成员数
   bool isNoDisturb; // 是否免打扰
   bool isBlocked; // 是否屏蔽群消息
   JMGroupType groupType; // 群类型
