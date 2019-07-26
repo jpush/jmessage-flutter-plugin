@@ -351,6 +351,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
       return;
     }
+    Log.d("Android","Action - userRegister: username=" + username + ",pw=" + password);
 
     JMessageClient.register(username, password, optionalUserInfo, new BasicCallback() {
       @Override
@@ -373,6 +374,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
       return;
     }
+    Log.d("Android","Action - login: username=" + username + ",pw=" + password);
 
     JMessageClient.login(username, password, new BasicCallback() {
       @Override
@@ -1074,6 +1076,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   }
 
   private void retractMessage(MethodCall call, final Result result) {
+    Log.d("Android","retractMessage:" + call.arguments);
+
     HashMap<String, Object> map = call.arguments();
 
     Conversation conversation;
@@ -1094,7 +1098,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       return;
     }
 
-    Message msg = conversation.getMessage(Integer.parseInt(messageId));
+    Message msg = conversation.getMessage(Long.parseLong(messageId));
     conversation.retractMessage(msg, new BasicCallback() {
       @Override
       public void gotResult(int status, String desc) {
@@ -2899,6 +2903,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    * @param event 消息撤回事件。
    */
   public void onEventMainThread(MessageRetractEvent event) throws JSONException {
+    Log.d("Android","onEvent MessageRetractEvent:");
+
     HashMap json = new HashMap();
     json.put("conversation", toJson(event.getConversation()));
     json.put("retractedMessage", toJson(event.getRetractedMessage()));
@@ -2960,32 +2966,45 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   /**
    * 监听接收入群申请事件
    */
-  public void onEventMainThread(GroupApprovalEvent event) throws JSONException {
+  public void onEventMainThread(final GroupApprovalEvent event) throws JSONException {
     Log.d(TAG, "GroupApprovalEvent, event: " + event);
+
     groupApprovalEventHashMap.put(event.getEventId() + "", event);
     GroupApprovalEvent.Type type = event.getType();
+
     final HashMap json = new HashMap();
     json.put("eventId", event.getEventId() + "");
     json.put("reason", event.getReason());
     json.put("groupId", event.getGid() + "");
     json.put("isInitiativeApply", type.equals(GroupApprovalEvent.Type.apply_join_group));
+
+    // 先异步获取 fromuserinfo
     event.getFromUserInfo(new GetUserInfoCallback() {
       @Override
       public void gotResult(int status, String desc, UserInfo userInfo) {
         if (status == 0) {
           json.put("sendApplyUser", toJson(userInfo));
+        }else {
+          json.put("sendApplyUser", new HashMap());
         }
+
+        // 再获取 approve list
+        event.getApprovalUserInfoList(new GetUserInfoListCallback() {
+          @Override
+          public void gotResult(int status, String s, List<UserInfo> list) {
+            if (status == 0) {
+              json.put("joinGroupUsers", toJson(list));
+            }else {
+              json.put("joinGroupUsers", new HashMap());
+            }
+            // 回调都回来了再发
+            JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveApplyJoinGroupApproval", json);
+          }
+        });
       }
     });
-    event.getApprovalUserInfoList(new GetUserInfoListCallback() {
-      @Override
-      public void gotResult(int status, String s, List<UserInfo> list) {
-        if (status == 0) {
-          json.put("joinGroupUsers", toJson(list));
-        }
-      }
-    });
-    JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveApplyJoinGroupApproval", json);
+
+
   }
 
   /**
