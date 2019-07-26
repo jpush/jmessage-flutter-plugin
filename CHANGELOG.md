@@ -1,3 +1,9 @@
+## 0.1.0
+fix:
+    1、修复：createMessage 方法中经纬度为 int 的错误；
+    2、修复：在 Android 下 GroupInfo 的属性 maxMemberCount 为 int 的错误；
+    3、修复：消息撤回事件回调中 message 为 null 的错误；
+    4、修复：监听不到入群申请通知事件的 bug ;
 ## 0.0.20
 fix:
     1、修改： sendLocationMessage 方法经纬度参数改为 double 类型

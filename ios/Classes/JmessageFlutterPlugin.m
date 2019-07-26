@@ -642,7 +642,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     // 为了和 Android 行为一致，在登录的时候自动下载缩略图。
     [myInfo thumbAvatarData:^(NSData *data, NSString *objectId, NSError *error) {
       // 下载失败也及时返回。
-      result(nil);
+      result([myInfo userToDictionary]);
     }];
   }];
 }
@@ -2439,6 +2439,22 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)onReceiveMessage:(JMSGMessage *)message error:(NSError *)error{
   [_channel invokeMethod:@"onReceiveMessage" arguments: [message messageToDictionary]];
 }
+- (void)onSendMessageResponse:(JMSGMessage *)message error:(NSError *)error {
+
+    if (!error) {
+        NSLog(@"消息发送成功：%@",message.serverMessageId);
+    }
+  FlutterResult result = self.SendMsgCallbackDic[message.msgId];
+  if (error) {
+    result([error flutterError]);
+    return;
+  }
+  result([message messageToDictionary]);
+}
+
+- (void)onReceiveMessageDownloadFailed:(JMSGMessage *)message{
+  NSLog(@"onReceiveMessageDownloadFailed");
+}
 
 /*!
  * @abstract 监听消息撤回事件
@@ -2635,22 +2651,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   [_channel invokeMethod:@"onReceiveGroupNicknameChange" arguments: eventDicArr];
 }
 
-- (void)onSendMessageResponse:(JMSGMessage *)message error:(NSError *)error {
 
-    if (!error) {
-        NSLog(@"消息发送成功：%@",message.serverMessageId);
-    }
-  FlutterResult result = self.SendMsgCallbackDic[message.msgId];
-  if (error) {
-    result([error flutterError]);
-    return;
-  }
-  result([message messageToDictionary]);
-}
-
-- (void)onReceiveMessageDownloadFailed:(JMSGMessage *)message{
-  NSLog(@"onReceiveMessageDownloadFailed");
-}
 
 #pragma mark - Conversation 回调
 
