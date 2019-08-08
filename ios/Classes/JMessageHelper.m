@@ -199,7 +199,7 @@
     dict[@"id"] = self.gid;
     dict[@"name"] = self.name;
     dict[@"desc"] = self.desc;
-    dict[@"maxMemberCount"] = self.maxMemberCount;
+    dict[@"maxMemberCount"] = @([self.maxMemberCount integerValue]);
     switch (self.groupType) {
         case kJMSGGroupTypePublic:
             dict[@"groupType"] = @"public";
@@ -400,9 +400,9 @@
     case kJMSGContentTypeLocation: {
       dict[@"type"] = @"location";
       JMSGLocationContent *locationContent = (JMSGLocationContent *) self.content;
-      dict[@"latitude"] = locationContent.latitude;
-      dict[@"longitude"] = locationContent.longitude;
-      dict[@"scale"] = locationContent.scale;
+      dict[@"latitude"] = @([locationContent.latitude doubleValue]);
+      dict[@"longitude"] = @([locationContent.longitude doubleValue]);
+      dict[@"scale"] = @([locationContent.scale intValue]);
       dict[@"address"] = locationContent.address;
       break;
     }

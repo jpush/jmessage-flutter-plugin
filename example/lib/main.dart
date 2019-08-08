@@ -5,8 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:jmessage_flutter/jmessage_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
-const String kMockAppkey =  '你自己应用的 AppKey';
+import 'package:jmessage_flutter_example/group_manage_view.dart';
+import 'package:jmessage_flutter_example/conversation_manage_view.dart';
+
+const String kMockAppkey =  "你自己应用的 AppKey";//'你自己应用的 AppKey';
 const String kMockUserName = '0001';
 const String kMockPassword = '1111';
 const String kCommonPassword = '123456a';
@@ -41,12 +45,24 @@ MethodChannel channel= MethodChannel('jmessage_flutter');
 
 void main() => runApp(new MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      home: MyHomePage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+// 我要展示的 home page 界面，这是个有状态的 widget
+class MyHomePage extends StatefulWidget {
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
   String _platformVersion = 'Unknown';
 
   @override
@@ -66,10 +82,23 @@ class _MyAppState extends State<MyApp> {
     addListener();
   }
 
+  void demoShowMessage(bool isShow, String msg) {
+    setState(() {
+      _loading = isShow;
+      _result = msg ?? "";
+    });
+  }
+
   void demoRegisterAction() async {
     print("registerAction : " + usernameTextEC1.text);
+
+    setState(() {
+      _loading = true;
+    });
+
     if (usernameTextEC1.text == null || usernameTextEC1.text == "") {
       setState(() {
+        _loading = false;
         _result = "【注册】username 不能为空";
       });
       return;
@@ -77,12 +106,22 @@ class _MyAppState extends State<MyApp> {
     String name = usernameTextEC1.text;
 
     await jmessage.userRegister(username: name, password: kCommonPassword, nickname: name);
+
+    setState(() {
+      _loading = false;
+    });
   }
 
   void demoLoginUserAction() async {
     print("loginUserAction : " + usernameTextEC1.text);
+
+    setState(() {
+      _loading = true;
+    });
+
     if (usernameTextEC1.text == null || usernameTextEC1.text == "") {
       setState(() {
+        _loading = false;
         _result = "【登录】username 不能为空";
       });
       return;
@@ -90,6 +129,7 @@ class _MyAppState extends State<MyApp> {
     String name = usernameTextEC1.text;
     JMUserInfo u = await jmessage.login(username: name, password: kCommonPassword);
     setState(() {
+      _loading = false;
       if (u == null){
         _result = "【登录后】";
       }else{
@@ -97,17 +137,35 @@ class _MyAppState extends State<MyApp> {
       }
     });
   }
+
   void demoLogoutAction() async {
-    await jmessage.logout();
+    print("demoLogoutAction : ");
+
     setState(() {
-      _result = "【已退出】";
+      _loading = true;
     });
+
+    await jmessage.logout()
+        .then((onValue) {
+          print("demoLogoutAction : then");
+          demoShowMessage(false, "【已退出】");
+          },
+        onError: (onError) {
+          print("demoLogoutAction : onError $onError");
+          demoShowMessage(false, onError.toString());
+        });
   }
 
   void demoGetCurrentUserInfo() async {
+    print("demoGetCurrentUserInfo : ");
+
+    setState(() {
+      _loading = true;
+    });
     JMUserInfo u = await jmessage.getMyInfo();
 
     setState(() {
+      _loading = false;
       if (u == null) {
         _result = " ===== 您还未登录账号 ===== \n【获取登录用户信息】null";
       }else{
@@ -116,24 +174,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-//  // 测试0001收到的历史消息
-//  void testGetHistorMessage() async{
-//    await jmessage.login(username: "0001", password: kMockPassword);
-//    JMSingle msg = JMSingle.fromJson({"username":"0002"});
-//    jmessage.getHistoryMessages(type: msg, from: 0, limit: 10).then((msgList){
-//      for(JMNormalMessage msg in msgList){
-//        print("shikk history msg ::   ${msg.toJson()}");
-//      }
-//    });
-//
-//  }
-
 
   int textIndex = 0;
   void demoSendTextMessage() async {
     print("demoSendTextMessage" + usernameTextEC2.text);
+
+    setState(() {
+      _loading = true;
+    });
+
     if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
       setState(() {
+        _loading = false;
         _result = "【发消息】对方 username 不能为空";
       });
       return;
@@ -143,6 +195,7 @@ class _MyAppState extends State<MyApp> {
     JMSingle type = JMSingle.fromJson({"username":name});
     JMTextMessage msg = await jmessage.sendTextMessage(type: type,text: "send msg queen index $textIndex");
     setState(() {
+      _loading = false;
       _result = "【文本消息】${msg.toJson()}";
     });
     textIndex ++;
@@ -151,8 +204,13 @@ class _MyAppState extends State<MyApp> {
   void demoSendLocationMessage() async {
     print("demoSendLocationMessage" + usernameTextEC2.text);
 
+    setState(() {
+      _loading = true;
+    });
+
     if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
       setState(() {
+        _loading = false;
         _result = "【发消息】对方 username 不能为空";
       });
       return;
@@ -162,45 +220,11 @@ class _MyAppState extends State<MyApp> {
     JMSingle type = JMSingle.fromJson({"username":username});
     JMLocationMessage msg = await jmessage.sendLocationMessage(type: type, latitude: 100.0, longitude: 200.0, scale: 1, address: "详细地址");
     setState(() {
+      _loading = false;
       _result = "【地理位置消息】${msg.toJson()}";
     });
   }
 
-  void demoGetAllConersationList () async {
-    List<JMConversationInfo> conversations = await jmessage.getConversations();
-    setState(() {
-      _result = "【获取会话列表】总数 count = ${conversations.length}";
-    });
-  }
-
-  void demoCreateGroup() async {
-    print("demoCreateGroup" + usernameTextEC2.text);
-
-    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
-      setState(() {
-        _result = "【创建公开群】group name 不能为空";
-      });
-      return;
-    }
-    String name = usernameTextEC2.text;
-    String groupIdString = await jmessage.createGroup(groupType: JMGroupType.public, name: name, desc: "$name-的群描述信息");
-    setState(() {
-      _result = "【创建公开群】创建成功，gid = $groupIdString";
-    });
-  }
-
-  void demoApplyJoinGroup() async {
-    print("demoApplyJoinGroup" + usernameTextEC2.text);
-
-    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
-      setState(() {
-        _result = "【申请加入群组】gid 不能为空";
-      });
-      return;
-    }
-    String gid = usernameTextEC2.text;
-    await jmessage.applyJoinGroup(groupId: gid);
-  }
 
 
   void addListener() async {
@@ -999,102 +1023,92 @@ class _MyAppState extends State<MyApp> {
   }
 
 
+  Widget _buildContext() {
+    return new GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: new Container(
+        child: new Column(
+          children: <Widget>[
+            new Container(
+              margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+              height: 35,
+              color: Colors.brown,
+              child: new CustomTextField(hintText: "请输入登录的 username", controller: usernameTextEC1),
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(" "),
+                new CustomButton(title: "注册", onPressed: demoRegisterAction),
+                new Text(" "),
+                new CustomButton(title: "登录",onPressed: demoLoginUserAction),
+                new Text(" "),
+                new CustomButton(title: "用户信息", onPressed: demoGetCurrentUserInfo),
+                new Text(" "),
+                new CustomButton(title: "退出", onPressed: demoLogoutAction),
+              ],
+            ),
+            new Container(
+              margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
+              height: 35,
+              color: Colors.brown,
+              child: new CustomTextField(hintText: "请输入username", controller: usernameTextEC2),
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(" "),
+                new CustomButton(title: "发送文本消息", onPressed: demoSendTextMessage),
+                new Text(" "),
+                new CustomButton(title: "发送位置消息", onPressed:demoSendLocationMessage),
+              ],
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(" "),
+                new CustomButton(title: "会话管理界面",onPressed: (){
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new ConversationManageView()));
+                }),
+                new Text(" "),
+                new CustomButton(title: "群组管理界面", onPressed: (){
+                    Navigator.push(context, new MaterialPageRoute(builder: (context) => new GroupManageView()));
+                  },
+                ),
+              ],
+            ),
+            new Container(
+              margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
+              color: Colors.brown,
+              child: Text(_result),
+              width: double.infinity,
+              height: 200,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _loading = false;
   String _result = "展示信息栏";
   var usernameTextEC1 = new TextEditingController();
   var usernameTextEC2 = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('JMessage Plugin App'),
-        ),
-        body: new GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: new Container(
-            child: new Column(
-              children: <Widget>[
-                new Container(
-                  margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
-                  height: 35,
-                  color: Colors.brown,
-                  child: new TextField(
-                    autofocus: false,
-                    style: TextStyle(color: Colors.black),
-                    decoration: InputDecoration(
-                        hintText: "请输入登录的 username",
-                        hintStyle: TextStyle(color: Colors.black)
-                    ),
-                    controller: usernameTextEC1,
-                  ),
-                ),
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    new Text(" "),
-                    new CustomButton(title: "注册", onPressed: demoRegisterAction),
-                    new Text(" "),
-                    new CustomButton(title: "登录",onPressed: demoLoginUserAction),
-                    new Text(" "),
-                    new CustomButton(title: "用户信息", onPressed: demoGetCurrentUserInfo),
-                    new Text(" "),
-                    new CustomButton(title: "退出", onPressed: demoLogoutAction),
-                  ],
-                ),
-                new Container(
-                  margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  height: 35,
-                  color: Colors.brown,
-                  child: new TextField(
-                    autofocus: false,
-                    style: TextStyle(color: Colors.black),
-                    decoration: InputDecoration(
-                        hintText: "请输入usernmae/group name", hintStyle: TextStyle(color: Colors.black)
-                    ),
-                    controller: usernameTextEC2,
-                  ),
-                ),
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    new Text(" "),
-                    new CustomButton(title: "发送文本消息", onPressed: demoSendTextMessage),
-                    new Text(" "),
-                    new CustomButton(title: "发送位置消息", onPressed:demoSendLocationMessage),
-                    new Text(" "),
-                    new CustomButton(title: "手动添加监听",onPressed: addListener),
-                  ],
-                ),
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    new Text(" "),
-                    new CustomButton(title: "获取会话列表",onPressed: demoGetAllConersationList),
-                    new Text(" "),
-                    new CustomButton(title: "创建公开群组", onPressed: demoCreateGroup),
-                    new Text(" "),
-                    new CustomButton (title: "申请加入群组", onPressed: demoApplyJoinGroup),
-                  ],
-                ),
-                new Container(
-                  margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
-                  color: Colors.brown,
-                  child: Text(_result),
-                  width: double.infinity,
-                  height: 200,
-                ),
-              ],
-            ),
-          ),
-        ),
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('JMessage Plugin App'),
       ),
+      body: ModalProgressHUD(child: _buildContext(), inAsyncCall: _loading),
     );
   }
 }
+
 
 
 void verifyUser(JMUserInfo user) {
@@ -1181,7 +1195,34 @@ class CustomButton extends StatelessWidget {
       highlightColor: Color(0xff888888),
       splashColor: Color(0xff888888),
       textColor: Colors.white,
-//      padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+      //padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+    );
+  }
+}
+
+class CustomTextField extends StatelessWidget {
+
+  final String hintText;
+  final TextEditingController controller ;
+
+  const CustomTextField({@required this.hintText, @required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return new Container(
+      margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
+      height: 35,
+      color: Colors.brown,
+      child: new TextField(
+        autofocus: false,
+        style: TextStyle(color: Colors.black),
+        decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(color: Colors.black)
+        ),
+        controller: controller,
+      ),
     );
   }
 }

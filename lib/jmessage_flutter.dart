@@ -341,7 +341,6 @@ class JmessageFlutter {
 
   Future<void> logout() async {
     await _channel.invokeMethod('logout');
-    return;
   }
 
 
@@ -460,7 +459,7 @@ class JmessageFlutter {
     Map<dynamic, dynamic> customObject,
     double latitude,
     double longitude,
-    num scale,
+    int scale,
     String address,
     Map<dynamic, dynamic> extras,
   }) async {
@@ -612,7 +611,7 @@ class JmessageFlutter {
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
     @required double latitude,
     @required double longitude,
-    @required num scale,
+    @required int scale,
     String address,
     JMMessageSendOptions sendOption,
     Map<dynamic, dynamic> extras,
@@ -698,7 +697,17 @@ class JmessageFlutter {
 
     List resArr = await _channel.invokeMethod('getHistoryMessages', 
       param..removeWhere((key,value) => value == null));
-    var res = resArr.map((messageMap) => JMNormalMessage.generateMessageFromJson(messageMap)).toList();
+
+    List res = [];
+    for (Map messageMap in resArr) {
+      dynamic d = JMNormalMessage.generateMessageFromJson(messageMap);
+      if (d != null) {
+        res.add(d);
+      }else{
+        print("get history msg, get a message is null");
+      }
+    }
+    //var res = resArr.map((messageMap) => JMNormalMessage.generateMessageFromJson(messageMap)).toList();
     return res;
   }
 
@@ -1684,12 +1693,15 @@ class JMNormalMessage {
           case JMMessageType.event:
             return JMEventMessage.fromJson(json);
             break;
+          case JMMessageType.prompt:
+            return JMPromptMessage.fromJson(json);
+            break;
         }
       }
 }
 
 enum JMMessageType {
-  text, image, voice, file, custom, location, event
+  text, image, voice, file, custom, location, event,prompt
 }
 
 class JMTextMessage extends JMNormalMessage {
@@ -1754,9 +1766,9 @@ class JMFileMessage extends JMNormalMessage {
 }
 
 class JMLocationMessage extends JMNormalMessage {
-  num longitude;  // 经度
-  num latitude;   // 纬度
-  num scale;      // 地图缩放比例
+  double longitude;  // 经度
+  double latitude;   // 纬度
+  int scale;      // 地图缩放比例
   String address; // 详细地址
 
   Map toJson() {
@@ -1791,6 +1803,21 @@ class JMCustomMessage extends JMNormalMessage {
       super.fromJson(json);
 }
 
+
+class JMPromptMessage extends JMNormalMessage {
+  String promptText;
+
+  Map toJson() {
+    var json = super.toJson();
+    json["promptText"] = promptText;
+    return json;
+  }
+
+  JMPromptMessage.fromJson(Map<dynamic, dynamic> json)
+      :promptText = json["promptText"],
+        super.fromJson(json);
+}
+
 enum JMEventType {
   group_member_added, group_member_removed, group_member_exit
 }
@@ -1812,6 +1839,8 @@ class JMEventMessage extends JMNormalMessage {
       usernames = json['usernames'],
       super.fromJson(json);
 }
+
+
 
 enum JMLoginStateChangedType {
   user_password_change, user_logout, user_deleted, user_login_status_unexpected, user_kicked
@@ -1931,7 +1960,7 @@ class JMGroupInfo {
   int level;  // 群组等级，默认等级 4
   String owner; // 群主的 username
   String ownerAppKey; // 群主的 appKey
-  String maxMemberCount; // 最大成员数
+  int maxMemberCount; // 最大成员数
   bool isNoDisturb; // 是否免打扰
   bool isBlocked; // 是否屏蔽群消息
   JMGroupType groupType; // 群类型
@@ -2064,6 +2093,15 @@ class JMConversationInfo {
   dynamic latestMessage; // 最近的一条消息对象。如果不存在消息，则 conversation 对象中没有该属性。
   Map<dynamic, dynamic> extras;
 
+  Map toJson() {
+    return {
+      'title': title,
+      'conversationType': getStringFromEnum(conversationType),
+      'unreadCount': unreadCount,
+      'extras': extras.toString(),
+    };
+  }
+
   JMConversationInfo.fromJson(Map<dynamic, dynamic> json)
     : conversationType = getEnumFromString(JMConversationType.values, json['conversationType']),
       title = json['title'],
@@ -2159,7 +2197,7 @@ class JMConversationInfo {
   Future<JMLocationMessage> sendLocationMessage({
     @required double latitude,
     @required double longitude,
-    @required num scale,
+    @required int scale,
     String address,
     JMMessageSendOptions sendOption,
     Map<dynamic, dynamic> extras,
