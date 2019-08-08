@@ -191,7 +191,7 @@ class JsonUtils {
         result.put("desc", groupInfo.getGroupDescription());
         result.put("level", groupInfo.getGroupLevel());
         result.put("avatarThumbPath", groupInfo.getAvatar());
-        result.put("maxMemberCount", String.valueOf(groupInfo.getMaxMemberCount()));
+        result.put("maxMemberCount", groupInfo.getMaxMemberCount());//String.valueOf(groupInfo.getMaxMemberCount())
         switch (groupInfo.getGroupType()) {
             case public_group: {}
                 result.put("groupType", "public");
@@ -261,8 +261,6 @@ class JsonUtils {
         }
         MessageContent content = msg.getContent();
         if (content.getStringExtras() != null) {
-//            TODO:
-
             result.put("extras", content.getStringExtras());
         } else {
             result.put("extras", new HashMap());
@@ -295,10 +293,10 @@ class JsonUtils {
             break;
         case location:
             result.put("type", "location");
-            result.put("latitude", ((LocationContent) content).getLatitude());
-            result.put("longitude", ((LocationContent) content).getLongitude());
+            result.put("latitude", ((LocationContent) content).getLatitude().doubleValue());
+            result.put("longitude", ((LocationContent) content).getLongitude().doubleValue());
             result.put("address", ((LocationContent) content).getAddress());
-            result.put("scale", ((LocationContent) content).getScale());
+            result.put("scale", ((LocationContent) content).getScale().intValue());
             break;
         case eventNotification:
             result.put("type", "event");

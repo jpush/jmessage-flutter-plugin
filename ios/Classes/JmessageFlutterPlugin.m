@@ -309,6 +309,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSLog(@"Action - handleMethodCall:: method =%@",call.method);
   if ([@"getPlatformVersion" isEqualToString:call.method]) {
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if([@"setup" isEqualToString:call.method]) {
@@ -1420,8 +1421,10 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return;
     }
-    
-    NSArray *groudIdList = resultObject;
+    NSMutableArray *groudIdList = [NSMutableArray array];
+    for (NSNumber *gid in resultObject) {
+        [groudIdList addObject:[NSString stringWithFormat:@"%@",gid]];
+    }
     result(groudIdList);
   }];
 }

@@ -1,3 +1,9 @@
+## 0.2.0
+fix:
+    1、新增：消息撤回类型消息；
+    2、修复：Group 和 GroupInfo 属性 maxMemberCount 改为 int 类型；
+    3、修复：获取我的群组 crash
+    
 ## 0.1.0
 fix:
     1、修复：createMessage 方法中经纬度为 int 的错误；
