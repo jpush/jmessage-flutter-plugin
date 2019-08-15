@@ -745,7 +745,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
           break;
         case "location":
           double latitude = params.getDouble("latitude");
-          double longitude = params.getDouble("latitude");
+          double longitude = params.getDouble("longitude");
           int scale = params.getInt("scale");
           String address = params.getString("address");
           content = new LocationContent(latitude, longitude, scale, address);
