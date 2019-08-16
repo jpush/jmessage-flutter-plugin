@@ -492,9 +492,15 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self processApplyJoinGroup:call result:result];
   } else if([@"dissolveGroup" isEqualToString:call.method]) {
     [self dissolveGroup:call result:result];
-  } else {
+  } else if([call.method isEqualToString:@"sendMessageTransCommand"]) {
+      [self sendMessageTransCommand:call result:result];
+  } else if([call.method isEqualToString:@"sendCrossDeviceTransCommand"]){
+      [self sendCrossDeviceTransCommand:call result:result];
+  }else {
     result(FlutterMethodNotImplemented);
   }
+    
+    
 }
 
 - (void)setup:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -2422,6 +2428,47 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }];
 }
 
+- (void)sendMessageTransCommand:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSDictionary *param = call.arguments;
+    NSString *message = param[@"message"];
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+        if (error) {
+            result([error flutterError]);
+            return ;
+        }
+        [conversation sendTransparentMessage:message completionHandler:^(id resultObject, NSError *error) {
+            if (error) {
+                result([error flutterError]);
+                return;
+            }
+            result(nil);
+        }];
+    }];
+}
+- (void)sendCrossDeviceTransCommand:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSDictionary *param = call.arguments;
+    NSString *message = param[@"message"];
+    NSString *platform = param[@"platform"];//android,ios,windows,web,all;
+    JMSGPlatformType platformType = kJMSGPlatformTypeAll;
+    if ([platform isEqualToString:@"android"]) {
+        platformType = kJMSGPlatformTypeAndroid;
+    }else if ([platform isEqualToString:@"ios"]) {
+        platformType = kJMSGPlatformTypeiOS;
+    }else if ([platform isEqualToString:@"windows"]) {
+        platformType = kJMSGPlatformTypeWindows;
+    }else if ([platform isEqualToString:@"web"]) {
+        platformType = kJMSGPlatformTypeWeb;
+    }else{//all
+        platformType = kJMSGPlatformTypeAll;
+    }
+    [JMessage sendCrossDeviceTransMessage:message platform:platformType handler:^(id resultObject, NSError *error) {
+        if (error) {
+            result([error flutterError]);
+            return;
+        }
+        result(nil);
+    }];
+}
 
 #pragma mark - AppDelegate
 

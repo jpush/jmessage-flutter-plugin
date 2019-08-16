@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import cn.jpush.im.android.api.content.MessageContent;
+import cn.jpush.im.android.api.enums.PlatformType;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -294,6 +295,10 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       processApplyJoinGroup(call, result);
     } else if (call.method.equals("dissolveGroup")) {
       dissolveGroup(call, result);
+    } else if (call.method.equals("sendMessageTransCommand")) {
+      sendMessageTransCommand(call, result);
+    }else if (call.method.equals("sendCrossDeviceTransCommand")) {
+      sendCrossDeviceTransCommand(call, result);
     } else {
       result.notImplemented();
     }
@@ -745,7 +750,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
           break;
         case "location":
           double latitude = params.getDouble("latitude");
-          double longitude = params.getDouble("latitude");
+          double longitude = params.getDouble("longitude");
           int scale = params.getInt("scale");
           String address = params.getString("address");
           content = new LocationContent(latitude, longitude, scale, address);
@@ -2716,10 +2721,75 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     });
   }
 
+  private void sendMessageTransCommand(MethodCall call, final Result result) {
 
+    HashMap<String, Object> map = call.arguments();
+    try {
+      JSONObject params = new JSONObject(map);
+      String message = params.getString("message");
+      String type = params.getString("type");
 
+      if (type.equals("single")) {
+        String username = params.getString("username");
+        String appKey = params.has("appKey") ? params.getString("appKey") : JmessageFlutterPlugin.appKey;
 
+        JMessageClient.sendSingleTransCommand(username, appKey, message, new BasicCallback() {
+          @Override
+          public void gotResult(int status, String desc) {
+            handleResult(status, desc, result);
+          }
+        });
 
+      } else if (type.equals("group")) {
+        final long groupId = Long.parseLong(params.getString("groupId"));
+
+        JMessageClient.sendGroupTransCommand(groupId, message, new BasicCallback() {
+          @Override
+          public void gotResult(int status, String desc) {
+            handleResult(status, desc, result);
+          }
+        });
+      }
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+  }
+
+  private void sendCrossDeviceTransCommand(MethodCall call, final Result result) {
+    HashMap<String, Object> map = call.arguments();
+    try {
+      JSONObject params = new JSONObject(map);
+      String message = params.getString("message");
+      String type = params.getString("platform");
+
+      PlatformType platformType = PlatformType.all;
+      if (type.equals("android")) {
+        platformType = PlatformType.android;
+      }else if (type.equals("ios")) {
+        platformType = PlatformType.ios;
+      }else if (type.equals("windows")) {
+        platformType = PlatformType.windows;
+      }else if (type.equals("web")) {
+        platformType = PlatformType.web;
+      }else {//all
+        platformType = PlatformType.all;
+      }
+
+      JMessageClient.sendCrossDeviceTransCommand(platformType, message, new BasicCallback() {
+        @Override
+        public void gotResult(int status, String desc) {
+          handleResult(status, desc, result);
+        }
+      });
+
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+  }
 
 
 
@@ -2917,9 +2987,9 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
    *
    * @param event 透传消息事件。
    */
-  public void onEventMainThread(CommandNotificationEvent event) {
+  public void onEventMainThread(final CommandNotificationEvent event) {
     final HashMap result = new HashMap();
-    result.put("content", event.getMsg());
+    result.put("message", event.getMsg());
 
     event.getSenderUserInfo(new GetUserInfoCallback() {
       @Override
@@ -2927,27 +2997,29 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         if (status == 0) {
           result.put("sender", toJson(userInfo));
         }
-      }
-    });
+        event.getTargetInfo(new CommandNotificationEvent.GetTargetInfoCallback() {
+          @Override
+          public void gotResult(int status, String desc, Object obj, CommandNotificationEvent.Type type) {
+            if (status == 0) {
+              if (type == CommandNotificationEvent.Type.single) {
+                UserInfo receiver = (UserInfo) obj;
+                result.put("receiver", toJson(receiver));
+                result.put("receiverType", "user");
 
-    event.getTargetInfo(new CommandNotificationEvent.GetTargetInfoCallback() {
-      @Override
-      public void gotResult(int status, String desc, Object obj, CommandNotificationEvent.Type type) {
-        if (status == 0) {
-          if (type == CommandNotificationEvent.Type.single) {
-            UserInfo receiver = (UserInfo) obj;
-            result.put("receiver", toJson(receiver));
-            result.put("receiverType", "single");
+              } else {
+                GroupInfo receiver = (GroupInfo) obj;
+                result.put("receiver", toJson(receiver));
+                result.put("receiverType", "group");
+              }
 
-          } else {
-            GroupInfo receiver = (GroupInfo) obj;
-            result.put("receiver", toJson(receiver));
-            result.put("receiverType", "group");
+              JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveTransCommand", result);
+            }
           }
-          JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveTransCommand", result);
-        }
+        });
       }
     });
+
+
   }
 
   /**
