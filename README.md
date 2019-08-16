@@ -9,7 +9,7 @@
 
 ```
 dependencies:
-  jmessage_flutter: 0.2.0
+  jmessage_flutter: 0.3.0
 ```
 
 
