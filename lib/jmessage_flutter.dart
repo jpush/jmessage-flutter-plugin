@@ -222,7 +222,8 @@ class JmessageFlutter {
         case 'onReceiveTransCommand':
           for (JMReceiveTransCommandListener cb in _eventHanders.receiveTransCommand) {
             Map json = call.arguments.cast<dynamic, dynamic>();
-            cb(JMReceiveTransCommandEvent.fromJson(json));
+            JMReceiveTransCommandEvent ev = JMReceiveTransCommandEvent.fromJson(json);
+            cb(ev);
           }
           break;
         case 'onReceiveChatRoomMessage':
@@ -1401,8 +1402,43 @@ class JmessageFlutter {
     
     return;
   }
+
+  /// 会话间透传命令，只支持 single、group，不支持 chatRoom
+  Future<void> sendMessageTransCommand({
+    @required String message,
+    @required dynamic target, //(JMSingle | JMGroup)
+  }) async {
+      if (target is JMChatRoom) {
+        print("does not support chatroom message trans.");
+        return;
+      }
+
+      Map param = target.toJson();
+      param["message"] = message;
+      param.removeWhere((key, value) => value == null);
+
+      await _channel.invokeMethod('sendMessageTransCommand',param);
+  }
+
+  /// 设备间透传命令
+  Future<void> sendCrossDeviceTransCommand({
+    @required String message,
+    @required JMPlatformType platform,
+  }) async {
+
+    Map param = Map();
+    param["message"] = message;
+    param["type"] = getStringFromEnum(platform);
+    param.removeWhere((key, value) => value == null);
+
+    await _channel.invokeMethod('sendCrossDeviceTransCommand',param);
+  }
+
 }
 
+enum JMPlatformType {
+  android,ios,windows,web,all
+}
 enum JMConversationType {
   single, group, chatRoom
 }
@@ -1888,18 +1924,18 @@ class JMReceiveTransCommandEvent {
   }
 
   JMReceiveTransCommandEvent.fromJson(Map<dynamic, dynamic> json)
-    : receiverType = getEnumFromString(JMTargetType.values, json['receiverType']),
-      message = json['message'],
-      sender = json['sender'] {
-        switch (receiverType) {
-          case JMTargetType.user:
-            receiver = JMUserInfo.fromJson(json['receiver']);
-            break;
-          case JMTargetType.group:
-            receiver = JMGroupInfo.fromJson(json['receiver']);
-            break;
-        }
-      }
+      :receiverType = getEnumFromString(JMTargetType.values, json['receiverType']),
+        message = json['message'],
+        sender = JMUserInfo.fromJson(json['sender']) {
+          switch (receiverType) {
+            case JMTargetType.user:
+                receiver = JMUserInfo.fromJson(json['receiver']);
+              break;
+            case JMTargetType.group:
+              receiver = JMGroupInfo.fromJson(json['receiver']);
+              break;
+    }
+  }
 }
 
 class JMReceiveApplyJoinGroupApprovalEvent {
