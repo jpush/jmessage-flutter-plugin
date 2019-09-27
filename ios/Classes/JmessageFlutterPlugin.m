@@ -2,6 +2,7 @@
 #import "JmessageFlutterPlugin.h"
 #import <AVFoundation/AVFoundation.h>
 
+#define JMLog(fmt, ...) NSLog((@"| JMessage | iOS | " fmt), ##__VA_ARGS__)
 typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError *error);
 
 @interface NSError (FlutterError)
@@ -285,6 +286,10 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     NSNumber *isRetainOffline = dic[@"isRetainOffline"];
     optionlContent.noSaveOffline = ![isRetainOffline boolValue];
   }
+  if(dic[@"needReadReceipt"]) {
+    NSNumber *needReadReceipt =  dic[@"needReadReceipt"];
+    optionlContent.needReadReceipt = [needReadReceipt boolValue];
+  }
   
   if(dic[@"isCustomNotificationEnabled"]) {
     NSNumber *isCustomNotificationEnabled = dic[@"isCustomNotificationEnabled"];
@@ -298,7 +303,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if(dic[@"notificationText"]) {
     customNotification.alert = dic[@"notificationText"];
   }
-  
+    
   optionlContent.customNotification = customNotification;
   
   return optionlContent;
@@ -309,7 +314,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  NSLog(@"Action - handleMethodCall:: method =%@",call.method);
+  JMLog(@"Action - handleMethodCall:: method =%@",call.method);
   if ([@"getPlatformVersion" isEqualToString:call.method]) {
     result([@"iOS " stringByAppendingString:[[UIDevice currentDevice] systemVersion]]);
   } else if([@"setup" isEqualToString:call.method]) {
@@ -496,11 +501,18 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       [self sendMessageTransCommand:call result:result];
   } else if([call.method isEqualToString:@"sendCrossDeviceTransCommand"]){
       [self sendCrossDeviceTransCommand:call result:result];
-  }else {
+  } else if ([call.method isEqualToString:@"getMessageUnreceiptCount"]) {
+      [self getMessageUnreceiptCount:call result:result];
+  } else if ([call.method isEqualToString:@"getMessageReceiptDetails"]) {
+      [self getMessageReceiptDetails:call result:result];
+  } else if ([call.method isEqualToString:@"setMessageHaveRead"]) {
+      [self setMessageHaveRead:call result:result];
+  } else if ([call.method isEqualToString:@"getMessageHaveReadStatus"]) {
+      [self getMessageHaveReadStatus:call result:result];
+  }
+  else {
     result(FlutterMethodNotImplemented);
   }
-    
-    
 }
 
 - (void)setup:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -1873,8 +1885,13 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return;
     }
-    
-    JMSGMessage *message = [conversation messageWithMessageId:param[@"messageId"]];
+      JMSGMessage *message = nil;
+      NSString *msgid = param[@"messageId"];
+      if ([msgid hasPrefix:@"msgId"]) {
+          message = [conversation messageWithMessageId:msgid];
+      }else{
+          message = [conversation messageWithServerMessageId:msgid];
+      }
     if (!message) {
       NSError *error = [NSError errorWithDomain:@"cann't find this message!" code: 1 userInfo: nil];
       result([error flutterError]);
@@ -1909,8 +1926,13 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return;
     }
-    
-    JMSGMessage *message = [conversation messageWithMessageId:param[@"messageId"]];
+      JMSGMessage *message = nil;
+      NSString *msgid = param[@"messageId"];
+      if ([msgid hasPrefix:@"msgId"]) {
+          message = [conversation messageWithMessageId:msgid];
+      }else{
+          message = [conversation messageWithServerMessageId:msgid];
+      }
     if (!message) {
       NSError *error = [NSError errorWithDomain:@"cann't find this message!" code: 1 userInfo: nil];
       result([error flutterError]);
@@ -1946,9 +1968,13 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return;
     }
-    
-    JMSGMessage *message = [conversation messageWithMessageId:param[@"messageId"]];
-    
+      JMSGMessage *message = nil;
+      NSString *msgid = param[@"messageId"];
+      if ([msgid hasPrefix:@"msgId"]) {
+          message = [conversation messageWithMessageId:msgid];
+      }else{
+          message = [conversation messageWithServerMessageId:msgid];
+      }
     if (message == nil) {
       NSError *error = [NSError errorWithDomain:@"cann't find this message!" code: 1 userInfo: nil];
       result([error flutterError]);
@@ -1979,8 +2005,14 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)downloadFile:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
-    JMSGMessage *message = [conversation messageWithMessageId:param[@"messageId"]];
     
+      JMSGMessage *message = nil;
+      NSString *msgid = param[@"messageId"];
+      if ([msgid hasPrefix:@"msgId"]) {
+          message = [conversation messageWithMessageId:msgid];
+      }else{
+          message = [conversation messageWithServerMessageId:msgid];
+      }
     if (!message) {
       NSError *error = [NSError errorWithDomain:@"cann't find this message!" code: 1 userInfo: nil];
       result([error flutterError]);
@@ -2470,6 +2502,116 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     }];
 }
 
+- (void)getMessageUnreceiptCount:(FlutterMethodCall*)call result:(FlutterResult)result {
+    JMLog(@"Action - getMessageUnreceiptCount::");
+    NSDictionary *param = call.arguments;
+    NSString *msgId = param[@"id"];
+    
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+        
+        if (error) {
+            result([error flutterError]);
+            return ;
+        }
+        JMSGMessage *message = [conversation messageWithMessageId:msgId];
+        NSInteger count = 0;
+        if (message) {
+            count = [message getMessageUnreadCount];
+        }else{
+            JMLog(@"can not found this msg(msgid=%@)",msgId);
+        }
+        
+        result(@(count));
+        return;
+    }];
+}
+- (void)getMessageReceiptDetails:(FlutterMethodCall*)call result:(FlutterResult)result {
+    JMLog(@"Action - getMessageUnreceiptCount::");
+    NSDictionary *param = call.arguments;
+    NSString *msgId = param[@"id"];
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+        
+        if (error) {
+            result([error flutterError]);
+            return ;
+        }
+        NSString *receiptKey = @"receiptList";
+        NSString *unreceiptKey = @"unreceiptList";
+        JMSGMessage *message = [conversation messageWithMessageId:msgId];
+        if (message) {
+            [message messageReadDetailHandler:^(NSArray * _Nullable readUsers, NSArray * _Nullable unreadUsers, NSError * _Nullable error) {
+                if (error) {
+                    result([error flutterError]);
+                    return ;
+                }
+                
+                NSMutableArray *readUserJsonArr = [NSMutableArray array];
+                NSMutableArray *unreadUserJsonArr = [NSMutableArray array];
+                for (JMSGUser *user in readUsers) {
+                    [readUserJsonArr addObject:[user userToDictionary]];
+                }
+                for (JMSGUser *user in unreadUsers) {
+                    [unreadUserJsonArr addObject:[user userToDictionary]];
+                }
+                NSDictionary *dic = @{
+                                      receiptKey:readUserJsonArr,
+                                      unreceiptKey:unreadUserJsonArr
+                                      };
+                result(dic);
+            }];
+        }else{
+            JMLog(@"can not found this msg(msgid=%@)",msgId);
+            NSDictionary *dic = @{
+                                  receiptKey:@[],
+                                  unreceiptKey:@[]
+                                  };
+            result(dic);
+        }
+    }];
+}
+- (void)setMessageHaveRead:(FlutterMethodCall*)call result:(FlutterResult)result {
+    JMLog(@"Action - setMessageHaveRead::");
+    NSDictionary *param = call.arguments;
+    NSString *msgId = param[@"id"];
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+        if (error) {
+            result([error flutterError]);
+            return ;
+        }
+        
+        JMSGMessage *message = [conversation messageWithMessageId:msgId];
+        if (message) {
+            [message setMessageHaveRead:^(id resultObject, NSError *error) {
+                if (error) {
+                    result(@(NO));
+                }else{
+                    result(@(YES));
+                }
+            }];
+        }else{
+            JMLog(@"can not found this msg(msgid=%@)",msgId);
+            result(@(NO));
+        }
+    }];
+}
+- (void)getMessageHaveReadStatus:(FlutterMethodCall*)call result:(FlutterResult)result {
+    JMLog(@"Action - getMessageHaveReadStatus::");
+    NSDictionary *param = call.arguments;
+    NSString *msgId = param[@"id"];
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+        if (error) {
+            result([error flutterError]);
+            return ;
+        }
+        JMSGMessage *message = [conversation messageWithMessageId:msgId];
+        if (message) {
+            result(@(message.isHaveRead));
+        }else{
+            JMLog(@"can not found this msg(msgid=%@)",msgId);
+            result(@(NO));
+        }
+    }];
+}
 #pragma mark - AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -2492,7 +2634,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)onSendMessageResponse:(JMSGMessage *)message error:(NSError *)error {
 
     if (!error) {
-        NSLog(@"消息发送成功：%@",message.serverMessageId);
+        JMLog(@"消息发送成功：%@",message.serverMessageId);
     }
   FlutterResult result = self.SendMsgCallbackDic[message.msgId];
   if (error) {
@@ -2503,7 +2645,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 }
 
 - (void)onReceiveMessageDownloadFailed:(JMSGMessage *)message{
-  NSLog(@"onReceiveMessageDownloadFailed");
+  JMLog(@"onReceiveMessageDownloadFailed");
 }
 
 /*!
@@ -2522,22 +2664,27 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 // 登录状态变更事件
 - (void)onReceiveUserLoginStatusChangeEvent:(JMSGUserLoginStatusChangeEvent *)event {
-  NSDictionary *param = nil;
-  switch (event.eventType) {
-    case kJMSGEventNotificationLoginKicked:
-      param = @{@"type":@"user_kicked"};
-      break;
-    case kJMSGEventNotificationServerAlterPassword:
-      param = @{@"type":@"user_password_change"};
-      
-      break;
-    case kJMSGEventNotificationUserLoginStatusUnexpected:
-      param = @{@"type":@"user_login_state_unexpected"};
-      break;
-    default:
-      break;
-  }
-  [_channel invokeMethod:@"onLoginStateChanged" arguments: param];
+    NSDictionary *param = nil;
+    switch (event.eventType) {
+        case kJMSGEventNotificationLoginKicked:
+            param = @{@"type":@"user_logout"};
+            break;
+        case kJMSGEventNotificationCurrentUserDeleted:
+            param = @{@"type":@"user_deleted"};
+            break;
+        case kJMSGEventNotificationServerAlterPassword:
+            param = @{@"type":@"user_password_change"};
+            break;
+        case kJMSGEventNotificationUserLoginStatusUnexpected:
+            param = @{@"type":@"user_login_status_unexpected"};
+            break;
+        case kJMSGEventNotificationCurrentUserDisabled:
+            param = @{@"type":@"user_disabled"};
+            break;
+        default:
+            break;
+    }
+    [_channel invokeMethod:@"onLoginStateChanged" arguments: param];
 }
 
 

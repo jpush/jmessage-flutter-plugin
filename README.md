@@ -7,11 +7,18 @@
 
 在工程 pubspec.yaml 中加入 dependencies
 
-```
+```yaml
+//pub.dev 集成
 dependencies:
-  jmessage_flutter: 0.3.0
+  jmessage_flutter: 0.4.0
+  
+//github 集成  
+dependencies:
+  jmessage_flutter:
+    git:
+      url: git://github.com/jpush/jmessage-flutter-plugin.git
+      ref: master
 ```
-
 
 
 ### 配置
