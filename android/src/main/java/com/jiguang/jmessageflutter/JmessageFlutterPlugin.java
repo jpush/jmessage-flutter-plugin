@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import cn.jpush.im.android.api.callback.GetReceiptDetailsCallback;
 import cn.jpush.im.android.api.content.MessageContent;
 import cn.jpush.im.android.api.enums.PlatformType;
 import io.flutter.plugin.common.MethodCall;
@@ -97,7 +98,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   public static JmessageFlutterPlugin instance;
 
-  private static String TAG = JmessageFlutterPlugin.class.getSimpleName();
+  private static String TAG = "| JMessage | Android | ";
 
   static final int ERR_CODE_PARAMETER = 1;
   static final int ERR_CODE_CONVERSATION = 2;
@@ -299,7 +300,14 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       sendMessageTransCommand(call, result);
     }else if (call.method.equals("sendCrossDeviceTransCommand")) {
       sendCrossDeviceTransCommand(call, result);
-    } else {
+    }else if (call.method.equals("getMessageUnreceiptCount")) {
+      getMessageUnreceiptCount(call,result);
+    }else if (call.method.equals("getMessageReceiptDetails")) {
+      getMessageReceiptDetails(call,result);
+    }else if (call.method.equals("setMessageHaveRead")) {
+      setMessageHaveRead(call,result);
+    }
+    else {
       result.notImplemented();
     }
   }
@@ -367,6 +375,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
   }
 
   private void login(MethodCall call, final Result result) {
+
     HashMap<String, Object> map = call.arguments();
     String username, password;
 
@@ -1110,6 +1119,165 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         handleResult(status, desc, result);
       }
     });
+  }
+  private void getMessageUnreceiptCount(MethodCall call, final Result result) {
+    Log.d(TAG,"getMessageUnreceiptCount:" + call.arguments);
+
+    HashMap<String, Object> map = call.arguments();
+
+    Conversation conversation;
+    String messageId;
+    try {
+      JSONObject params = new JSONObject(map);
+
+      conversation = JMessageUtils.getConversation(params);
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+        return;
+      }
+
+      messageId = params.getString("id");
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+
+    Message msg = conversation.getMessage(Integer.parseInt(messageId));
+    int count = 0;
+    if (msg != null) {
+        count = msg.getUnreceiptCnt();
+    }else {
+        Log.d(TAG,"this message was not found.");
+    }
+    result.success(count);
+  }
+
+  private void getMessageReceiptDetails(MethodCall call, final Result result) {
+    Log.d(TAG,"getMessageReceiptDetails: "  + call.arguments);
+
+    HashMap<String, Object> map = call.arguments();
+    Conversation conversation;
+    String messageId;
+    try {
+      JSONObject params = new JSONObject(map);
+
+      conversation = JMessageUtils.getConversation(params);
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+        return;
+      }
+      messageId = params.getString("id");
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+
+    Message msg = conversation.getMessage(Integer.parseInt(messageId));
+    if (msg != null) {
+      msg.getReceiptDetails(new GetReceiptDetailsCallback() {
+        @Override
+        public void gotResult(int code, String dec, List<ReceiptDetails> list) {
+          if (code == 0) {
+            ReceiptDetails details = list.get(0);
+            List<UserInfo> receiptList = details.getReceiptList();
+            List<UserInfo> unreceiptList = details.getUnreceiptList();
+            String serverMsgID = details.getServerMsgID() + "";
+
+            HashMap resMap = new HashMap();
+
+            ArrayList receiptJSONArr = new ArrayList();
+            for (UserInfo userInfo : receiptList) {
+              receiptJSONArr.add(toJson(userInfo));
+            }
+            resMap.put("receiptList",receiptJSONArr);
+
+            ArrayList unreceiptJSONArr = new ArrayList();
+            for (UserInfo userInfo : unreceiptList) {
+              unreceiptJSONArr.add(toJson(userInfo));
+            }
+            resMap.put("unreceiptList",unreceiptJSONArr);
+
+            result.success(resMap);
+          }else {
+            handleResult(code,dec,result);
+          }
+        }
+      });
+    }else {
+      Log.d(TAG,"can not found this msg(msgid="+messageId+")");
+      handleResult(ERR_CODE_MESSAGE, ERR_MSG_MESSAGE, result);
+    }
+  }
+
+  private void setMessageHaveRead(MethodCall call,final Result result) {
+    Log.d(TAG,"setMessageHaveRead: "  + call.arguments);
+
+    HashMap<String, Object> map = call.arguments();
+    Conversation conversation;
+    String messageId;
+    try {
+      JSONObject params = new JSONObject(map);
+
+      conversation = JMessageUtils.getConversation(params);
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+        return;
+      }
+      messageId = params.getString("id");
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+
+    Message msg = conversation.getMessage(Integer.parseInt(messageId));
+    if (msg != null) {
+      msg.setHaveRead(new BasicCallback() {
+        @Override
+        public void gotResult(int code, String s) {
+          if (code == 0) {
+            result.success(true);
+          } else {
+            result.success(false);
+          }
+        }
+      });
+    }else {
+      Log.d(TAG,"can not found this msg(msgid = "+ messageId + ")");
+      result.success(false);
+    }
+  }
+  private void getMessageHaveReadStatus(MethodCall call, Result result) {
+    Log.d(TAG,"getMessageHaveReadStatus: "  + call.arguments);
+
+    HashMap<String, Object> map = call.arguments();
+    Conversation conversation;
+    String messageId;
+    try {
+      JSONObject params = new JSONObject(map);
+
+      conversation = JMessageUtils.getConversation(params);
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+        return;
+      }
+      messageId = params.getString("id");
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+
+    Message msg = conversation.getMessage(Integer.parseInt(messageId));
+    if (msg != null) {
+      Boolean isHaveRead = msg.haveRead();
+      result.success(isHaveRead);
+    }else {
+      Log.d(TAG,"can not found this msg(msgid = "+ messageId + ")");
+      result.success(false);
+    }
   }
 
   private void getHistoryMessages(MethodCall call, Result result) {

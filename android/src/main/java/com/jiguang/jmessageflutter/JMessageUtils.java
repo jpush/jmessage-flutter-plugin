@@ -84,6 +84,9 @@ class JMessageUtils {
         if (json.has("notificationText") && !json.isNull("notificationText")) {
             messageSendingOptions.setNotificationText(json.getString("notificationText"));
         }
+        if (json.has("needReadReceipt") && !json.isNull("needReadReceipt")) {
+            messageSendingOptions.setNeedReadReceipt(json.getBoolean("needReadReceipt"));
+        }
 
         return messageSendingOptions;
     }
@@ -150,8 +153,11 @@ class JMessageUtils {
             }
 
             String messageId = params.getString("messageId");
-            return conversation.getMessage(Long.parseLong(messageId));
-
+            Message msg = conversation.getMessage(Integer.parseInt(messageId));
+            if (msg == null) {
+                msg = conversation.getMessage(Long.parseLong(messageId));
+            }
+            return msg;
         } else if (params.has("id")) { // 代表 JS 层传入的是 Message 对象。
             return JsonToMessage(params);
         }
