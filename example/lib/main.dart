@@ -57,28 +57,24 @@ class MyApp extends StatelessWidget {
 
 // 我要展示的 home page 界面，这是个有状态的 widget
 class MyHomePage extends StatefulWidget {
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   String _platformVersion = 'Unknown';
+  final String flutter_log = "| Example | Flutter | ";
 
   @override
   void initState() {
     super.initState();
-    print("demo manin init state");
+    print(flutter_log + "demo manin init state");
     // initPlatformState();
-    
+
     jmessage..setDebugMode(enable: true);
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
     jmessage.applyPushAuthority(
-        new JMNotificationSettingsIOS(
-            sound: true,
-            alert: true,
-            badge: true)
-    );
+        new JMNotificationSettingsIOS(sound: true, alert: true, badge: true));
     addListener();
   }
 
@@ -90,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoRegisterAction() async {
-    print("registerAction : " + usernameTextEC1.text);
+    print(flutter_log + "registerAction : " + usernameTextEC1.text);
 
     setState(() {
       _loading = true;
@@ -113,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoLoginUserAction() async {
-    print("loginUserAction : " + usernameTextEC1.text);
+    print(flutter_log + "loginUserAction : " + usernameTextEC1.text);
 
     setState(() {
       _loading = true;
@@ -127,37 +123,48 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     String name = usernameTextEC1.text;
-    JMUserInfo u = await jmessage.login(username: name, password: kCommonPassword);
-    setState(() {
-      _loading = false;
-      if (u == null){
-        _result = "【登录后】";
-      }else{
-        _result = "【登录后】${u.toJson()}";
-      }
+    await jmessage.login(username: name, password: kCommonPassword).then(
+        (onValue) {
+      setState(() {
+        _loading = false;
+        if (onValue is JMUserInfo) {
+          JMUserInfo u = onValue;
+          _result = "【登录后】${u.toJson()}";
+        }else{
+        _result = "【登录后】null}";}
+
+      });
+    }, onError: (error) {
+      setState(() {
+        _loading = false;
+        if (error is PlatformException) {
+          PlatformException ex = error;
+          _result = "【登录后】code = ${ex.code},message = ${ex.message}";
+        }else {
+          _result = "【登录后】code = ${error.toString()}";
+        }
+      });
     });
   }
 
   void demoLogoutAction() async {
-    print("demoLogoutAction : ");
+    print(flutter_log + "demoLogoutAction : ");
 
     setState(() {
       _loading = true;
     });
 
-    await jmessage.logout()
-        .then((onValue) {
-          print("demoLogoutAction : then");
-          demoShowMessage(false, "【已退出】");
-          },
-        onError: (onError) {
-          print("demoLogoutAction : onError $onError");
-          demoShowMessage(false, onError.toString());
-        });
+    await jmessage.logout().then((onValue) {
+      print(flutter_log + "demoLogoutAction : then");
+      demoShowMessage(false, "【已退出】");
+    }, onError: (onError) {
+      print(flutter_log + "demoLogoutAction : onError $onError");
+      demoShowMessage(false, onError.toString());
+    });
   }
 
   void demoGetCurrentUserInfo() async {
-    print("demoGetCurrentUserInfo : ");
+    print(flutter_log + "demoGetCurrentUserInfo : ");
 
     setState(() {
       _loading = true;
@@ -174,10 +181,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
-  int textIndex = 0;
   void demoSendTextMessage() async {
-    print("demoSendTextMessage" + usernameTextEC2.text);
+    print(flutter_log + "demoSendTextMessage " + usernameTextEC2.text);
 
     setState(() {
       _loading = true;
@@ -191,22 +196,27 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     String name = usernameTextEC2.text;
+    int textIndex =  DateTime.now().millisecondsSinceEpoch;
 
-    JMSingle type = JMSingle.fromJson({"username":name});
-    JMTextMessage msg = await jmessage.sendTextMessage(type: type,text: "send msg queen index $textIndex");
+    JMSingle type = JMSingle.fromJson({"username": name});
+    JMMessageSendOptions option = JMMessageSendOptions.fromJson({"needReadReceipt":true});
+    JMTextMessage msg = await jmessage.sendTextMessage(
+        type: type, text: "send msg current time: $textIndex",sendOption: option);
     setState(() {
       _loading = false;
-      _result = "【文本消息】${msg.toJson()}";
+      String messageString = "【文本消息】${msg.toJson()}";
+      _result = messageString;
+      print(flutter_log + messageString);
     });
-    textIndex ++;
   }
-  
+
   void demoSendLocationMessage() async {
-    print("demoSendLocationMessage" + usernameTextEC2.text);
+    print(flutter_log + "demoSendLocationMessage " + usernameTextEC2.text);
 
     setState(() {
       _loading = true;
     });
+
 
     if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
       setState(() {
