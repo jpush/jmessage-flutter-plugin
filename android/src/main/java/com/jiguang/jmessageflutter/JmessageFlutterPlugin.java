@@ -219,7 +219,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     } else if (call.method.equals("addUsersToBlacklist")) {
       addUsersToBlacklist(call, result);
     } else if (call.method.equals("removeUsersFromBlacklist")) {
-      addUsersToBlacklist(call, result);
+      removeUsersFromBlacklist(call, result);
     } else if (call.method.equals("getBlacklist")) {
       getBlacklist(call, result);
     } else if (call.method.equals("setNoDisturb")) {
