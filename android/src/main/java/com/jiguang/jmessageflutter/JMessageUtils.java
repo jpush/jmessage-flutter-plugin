@@ -152,11 +152,16 @@ class JMessageUtils {
                 return null;
             }
 
+            Message msg;
             String messageId = params.getString("messageId");
-            Message msg = conversation.getMessage(Integer.parseInt(messageId));
-            if (msg == null) {
+
+            Long b = Long.parseLong(messageId);
+            if (b > Integer.MAX_VALUE) {
                 msg = conversation.getMessage(Long.parseLong(messageId));
+            }else {
+                msg = conversation.getMessage(Integer.parseInt(messageId));
             }
+
             return msg;
         } else if (params.has("id")) { // 代表 JS 层传入的是 Message 对象。
             return JsonToMessage(params);

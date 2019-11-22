@@ -676,13 +676,21 @@ class JmessageFlutter {
     return res; 
   }
 
-  Future<void> retractMessage({
-    @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
-    @required String messageId,
-  }) async {
-    Map param = type.toJson();
 
-    param..addAll({'messageId': messageId});
+  /**
+   * 消息撤回
+   *
+   * @param target    聊天对象， JMSingle | JMGroup
+   * @param serverMessageId 消息服务器 id
+   *
+   * */
+  Future<void> retractMessage({
+    @required dynamic target, /// (JMSingle | JMGroup )
+    @required String serverMessageId,
+  }) async {
+    Map param = target.toJson();
+
+    param..addAll({'messageId': serverMessageId});
 
     print("retractMessage: ${param.toString()}");
 
@@ -692,6 +700,15 @@ class JmessageFlutter {
     return;
   }
 
+  /**
+   * 批量获取本地历史消息
+   *
+   * @param target 聊天对象， JMSingle | JMGroup
+   * @param from  起始位置
+   * @param limit 获取数量
+   * @param isDescend 是否倒叙
+   *
+   * */
   Future<List> getHistoryMessages({
     @required dynamic type, /// (JMSingle | JMGroup)
     @required int from,
@@ -722,6 +739,13 @@ class JmessageFlutter {
     return res;
   }
 
+  /**
+   * 获取本地单条消息
+    *
+    * @param target    聊天对象， JMSingle | JMGroup
+    * @param messageId 本地数据库中的消息id，非 serverMessageId
+    *
+    * */
   Future<dynamic> getMessageById({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
     @required String messageId,
@@ -738,6 +762,13 @@ class JmessageFlutter {
     return JMNormalMessage.generateMessageFromJson(msgMap);
   }
 
+  /**
+   * 删除本地单条消息
+   *
+   * @param target    聊天对象， JMSingle | JMGroup
+   * @param messageId 本地数据库中的消息id，非serverMessageId
+   *
+   * */
   Future<void> deleteMessageById({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
     @required String messageId,
@@ -1077,13 +1108,13 @@ class JmessageFlutter {
     };
   }
 
-  /*
-  * 下载缩略图
-  *
-  * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-  * @param messageId 本地数据库中的消息 id
-  *
-  * */
+  /**
+   * 下载缩略图
+   *
+   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
+   * @param messageId 本地数据库中的消息 id,非 serverMessageId
+   *
+   * */
   Future<Map> downloadThumbImage({
     @required dynamic target,
     @required String messageId,
@@ -1098,13 +1129,13 @@ class JmessageFlutter {
     };
   }
 
-  /*
-  * 下载原图
-  *
-  * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-  * @param messageId 本地数据库中的消息 id
-  *
-  * */
+  /**
+   * 下载原图
+   *
+   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
+   * @param messageId 本地数据库中的消息 id,非 serverMessageId
+   *
+   * */
   Future<Map> downloadOriginalImage({
     @required dynamic target,
     @required String messageId,
@@ -1119,13 +1150,13 @@ class JmessageFlutter {
     };
   }
 
-  /*
-  * 下载语音
-  *
-  * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-  * @param messageId 本地数据库中的消息 id
-  *
-  * */
+  /**
+   * 下载语音
+   *
+   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
+   * @param messageId 本地数据库中的消息 id,非 serverMessageId
+   *
+   * */
   Future<Map> downloadVoiceFile({
     @required dynamic target,
     @required String messageId,
@@ -1140,13 +1171,13 @@ class JmessageFlutter {
     };
   }
 
-  /*
-  * 下载
-  *
-  * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-  * @param messageId 本地数据库中的消息 id
-  *
-  * */
+  /**
+   * 下载文件
+   *
+   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
+   * @param messageId 本地数据库中的消息 id
+   *
+   * */
   Future<Map> downloadFile({
     @required dynamic target,
     @required String messageId,
