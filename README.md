@@ -10,7 +10,7 @@
 ```yaml
 //pub.dev 集成
 dependencies:
-  jmessage_flutter: 0.5.0
+  jmessage_flutter: 0.6.0
   
 //github 集成  
 dependencies:

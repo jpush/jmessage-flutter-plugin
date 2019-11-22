@@ -422,8 +422,8 @@ class _MyHomePageState extends State<MyHomePage> {
           );
 
           await jmessage.retractMessage(
-            type: kMockUser,
-            messageId: msg.id
+            target: kMockUser,
+            serverMessageId: msg.serverMessageId
           );
         });
   }
@@ -1055,6 +1055,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 new CustomButton(title: "注册", onPressed: demoRegisterAction),
                 new Text(" "),
                 new CustomButton(title: "登录",onPressed: demoLoginUserAction),
+              ],
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
                 new Text(" "),
                 new CustomButton(title: "用户信息", onPressed: demoGetCurrentUserInfo),
                 new Text(" "),
@@ -1081,11 +1086,28 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 new Text(" "),
                 new CustomButton(title: "会话管理界面",onPressed: (){
-                  Navigator.push(context, new MaterialPageRoute(builder: (context) => new ConversationManageView()));
+                  jmessage.getMyInfo().then((JMUserInfo userInfo){
+                    if (userInfo != null) {
+                      Navigator.push(context, new MaterialPageRoute(builder: (context) => new ConversationManageView()));
+                    }else{
+                      setState(() {
+                        _result = " 请先登录 ";
+                      });
+                    }
+                  });
+
                 }),
                 new Text(" "),
                 new CustomButton(title: "群组管理界面", onPressed: (){
-                    Navigator.push(context, new MaterialPageRoute(builder: (context) => new GroupManageView()));
+                  jmessage.getMyInfo().then((JMUserInfo userInfo){
+                    if (userInfo != null) {
+                      Navigator.push(context, new MaterialPageRoute(builder: (context) => new GroupManageView()));
+                    }else{
+                      setState(() {
+                        _result = " 请先登录 ";
+                      });
+                    }
+                  });
                   },
                 ),
               ],
