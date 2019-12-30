@@ -122,7 +122,7 @@ class JsonUtils {
         result.put("noteName", userInfo.getNotename() != null ? userInfo.getNotename() : "");
         result.put("noteText", userInfo.getNoteText() != null ? userInfo.getNoteText() : "");
         result.put("isNoDisturb", userInfo.getNoDisturb() == 1);
-        result.put("isInBlackList", userInfo.getNoDisturb() == 1);
+        result.put("isInBlackList", userInfo.getBlacklist() == 1);
         result.put("isFriend", userInfo.isFriend());
         Map<String, String> extras = userInfo.getExtras();
         result.put("extras", extras != null ? extras : new HashMap<String, String>());
