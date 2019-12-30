@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:platform/platform.dart';
 
 
-final String flutter_log = "| JMessage | Flutter | ";
+final String flutterLog = "| JMessage | Flutter | ";
 
 T getEnumFromString<T>(Iterable<T> values,String str) {
   return values.firstWhere((f) => f.toString().split('.').last == str
@@ -1514,7 +1514,7 @@ class JmessageFlutter {
     @required dynamic target, /// (JMSingle | JMGroup)
     @required String msgId,
   }) async {
-    print(flutter_log + "getMessageUnreceiptCount" + " msgid = $msgId");
+    print(flutterLog + "getMessageUnreceiptCount" + " msgid = $msgId");
 
     if (msgId == null || msgId.length == 0 || target == null) {
       return 0;
@@ -1542,7 +1542,7 @@ class JmessageFlutter {
     @required String msgId,
     @required JMCallback callback,
   }) async {
-    print(flutter_log + "getMessageUnreceiptCount" + " msgid = $msgId");
+    print(flutterLog + "getMessageUnreceiptCount" + " msgid = $msgId");
 
     if (msgId == null || msgId.length == 0 || target == null) {
       callback(null,null);
@@ -1576,7 +1576,7 @@ class JmessageFlutter {
     @required dynamic target, /// (JMSingle | JMGroup)
     @required String msgId,
   }) async {
-    print(flutter_log + "setMessageHaveRead" + " msgid = $msgId");
+    print(flutterLog + "setMessageHaveRead" + " msgid = $msgId");
 
     if (msgId == null || msgId.length == 0 || target == null) {
       return false;
@@ -1601,7 +1601,7 @@ class JmessageFlutter {
     @required dynamic target, /// (JMSingle | JMGroup)
     @required String msgId,
   }) async {
-    print(flutter_log + "getMessageHaveReadStatus" + " msgid = $msgId");
+    print(flutterLog + "getMessageHaveReadStatus" + " msgid = $msgId");
 
     if (msgId == null || msgId.length == 0 || target == null) {
       return false;
