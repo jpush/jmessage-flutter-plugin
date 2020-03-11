@@ -1,7 +1,5 @@
 package com.jiguang.jmessageflutter;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,14 +23,12 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
@@ -43,7 +39,6 @@ import cn.jpush.im.android.api.callback.GetBlacklistCallback;
 import cn.jpush.im.android.api.callback.GetGroupIDListCallback;
 import cn.jpush.im.android.api.callback.GetGroupInfoCallback;
 import cn.jpush.im.android.api.callback.GetGroupInfoListCallback;
-import cn.jpush.im.android.api.callback.GetGroupMembersCallback;
 import cn.jpush.im.android.api.callback.GetNoDisurbListCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
@@ -714,6 +709,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     String text;
     Map<String, String> extras = null;
     Conversation conversation;
+    List<UserInfo> atList = new ArrayList<>();
 
     try {
       JSONObject params = new JSONObject(map);
@@ -725,6 +721,20 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
       if (params.has("extras")) {
         extras = fromJson(params.getJSONObject("extras"));
+      }
+
+      if (params.has("atList")) {
+        GroupInfo groupInfo = (GroupInfo) conversation.getTargetInfo();
+        List<GroupMemberInfo> groupMemberInfos = groupInfo.getGroupMemberInfos();
+        JSONArray usersJsonArray = params.getJSONArray("atList");
+
+        for (int i = 0; i < usersJsonArray.length(); i++) {
+          for(int j=0; j< groupMemberInfos.size(); j++){
+            if( usersJsonArray.getString(i).equals(groupMemberInfos.get(j).getUserInfo().getUserName())){
+              atList.add(groupMemberInfos.get(j).getUserInfo());
+            }
+          }
+        }
       }
 
       String type = params.getString("messageType");
@@ -774,7 +784,14 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         content.setExtras(extras);
       }
 
-      final Message msg = conversation.createSendMessage(content);
+      Message msg;
+
+      if(atList != null && !atList.isEmpty()){
+        msg = conversation.createSendMessage(content,atList,"");
+      } else {
+        msg = conversation.createSendMessage(content);
+      }
+
       result.success(toJson(msg));
 
     } catch (Exception e) {
@@ -849,6 +866,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       if (params.has("messageSendingOptions")) {
         messageSendingOptions = toMessageSendingOptions(params.getJSONObject("messageSendingOptions"));
       }
+
+
     } catch (JSONException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
@@ -860,7 +879,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       content.setExtras(extras);
     }
 
-    sendMessage(conversation, content, messageSendingOptions, result);
+    sendMessage(conversation, content, messageSendingOptions ,result);
   }
 
   private void sendImageMessage(MethodCall call, Result result) {

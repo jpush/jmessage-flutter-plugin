@@ -473,11 +473,16 @@ class JmessageFlutter {
     int scale,
     String address,
     Map<dynamic, dynamic> extras,
+    List<String> atList
   }) async {
     Map param = targetType.toJson();
     
     if (extras != null) {
       param..addAll({'extras': extras});
+    }
+
+    if (atList != null && atList.isNotEmpty) {
+      param..addAll({'atList': atList});
     }
 
     param..addAll({
@@ -519,11 +524,14 @@ class JmessageFlutter {
     return res; 
   }
 
+
+  ///
   Future<JMTextMessage> sendTextMessage({
     @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
     @required String text,
     JMMessageSendOptions sendOption,
     Map<dynamic, dynamic> extras,
+    List<String> atUsers
   }) async {
     Map param = type.toJson();
     Map optionMap = {};
@@ -533,6 +541,10 @@ class JmessageFlutter {
     
     if (extras != null) {
       param..addAll({'extras': extras});
+    }
+
+    if(atUsers != null) {
+      param..addAll({'atUsers': atUsers});
     }
 
     param..addAll(optionMap)..addAll({'text': text});
