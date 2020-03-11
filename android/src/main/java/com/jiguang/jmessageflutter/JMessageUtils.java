@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 
 //import org.apache.cordova.CallbackContext;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,6 +23,7 @@ import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.content.MessageContent;
 import cn.jpush.im.android.api.model.Conversation;
 import cn.jpush.im.android.api.model.Message;
+import cn.jpush.im.android.api.model.UserInfo;
 import cn.jpush.im.android.api.options.MessageSendingOptions;
 import cn.jpush.im.api.BasicCallback;
 
@@ -171,8 +172,15 @@ class JMessageUtils {
     }
 
     static void sendMessage(Conversation conversation, MessageContent content, MessageSendingOptions options,
-            final Result callback) {
+                            List<UserInfo> atUsers, final Result callback) {
         final Message msg = conversation.createSendMessage(content);
+
+        if(!atUsers.isEmpty()){
+            conversation.createSendMessage(content, atUsers,"");
+        } else {
+            conversation.createSendMessage(content);
+        }
+
         msg.setOnSendCompleteCallback(new BasicCallback() {
             @Override
             public void gotResult(int status, String desc) {

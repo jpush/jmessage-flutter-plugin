@@ -1,7 +1,5 @@
 package com.jiguang.jmessageflutter;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,14 +23,12 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
@@ -43,7 +39,6 @@ import cn.jpush.im.android.api.callback.GetBlacklistCallback;
 import cn.jpush.im.android.api.callback.GetGroupIDListCallback;
 import cn.jpush.im.android.api.callback.GetGroupInfoCallback;
 import cn.jpush.im.android.api.callback.GetGroupInfoListCallback;
-import cn.jpush.im.android.api.callback.GetGroupMembersCallback;
 import cn.jpush.im.android.api.callback.GetNoDisurbListCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoCallback;
 import cn.jpush.im.android.api.callback.GetUserInfoListCallback;
@@ -830,6 +825,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     String text;
     Map<String, String> extras = null;
     MessageSendingOptions messageSendingOptions = null;
+    List<UserInfo> atUsers = new ArrayList<>();
     Conversation conversation;
 
     try {
@@ -849,6 +845,20 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       if (params.has("messageSendingOptions")) {
         messageSendingOptions = toMessageSendingOptions(params.getJSONObject("messageSendingOptions"));
       }
+
+      if (params.has("atUsers")) {
+        GroupInfo groupInfo = (GroupInfo) conversation.getTargetInfo();
+        List<GroupMemberInfo> groupMemberInfos = groupInfo.getGroupMemberInfos();
+        JSONArray usersJsonArray = params.getJSONArray("atUsers");
+
+        for (int i = 0; i < usersJsonArray.length(); i++) {
+          for(int j=0; j< groupMemberInfos.size(); j++){
+            if( usersJsonArray.getString(i).equals(groupMemberInfos.get(j).getUserInfo().getUserName())){
+              atUsers.add(groupMemberInfos.get(j).getUserInfo());
+            }
+          }
+        }
+      }
     } catch (JSONException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
@@ -860,7 +870,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       content.setExtras(extras);
     }
 
-    sendMessage(conversation, content, messageSendingOptions, result);
+    sendMessage(conversation, content, messageSendingOptions, atUsers ,result);
   }
 
   private void sendImageMessage(MethodCall call, Result result) {
@@ -910,7 +920,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       content.setExtras(extras);
     }
 
-    sendMessage(conversation, content, messageSendingOptions, result);
+    sendMessage(conversation, content, messageSendingOptions,null, result);
   }
 
   private void sendVoiceMessage(MethodCall call, Result result) {
@@ -958,7 +968,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         content.setExtras(extras);
       }
 
-      sendMessage(conversation, content, messageSendingOptions, result);
+      sendMessage(conversation, content, messageSendingOptions, null, result);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_FILE, ERR_MSG_FILE, result);
@@ -984,7 +994,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
       CustomContent content = new CustomContent();
       content.setAllValues(fromJson(customObject));
-      sendMessage(conversation, content, options, result);
+      sendMessage(conversation, content, options, null, result);
     } catch (JSONException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
@@ -1034,7 +1044,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       if (extras != null) {
         content.setExtras(extras);
       }
-      sendMessage(conversation, content, options, result);
+      sendMessage(conversation, content, options, null, result);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_FILE, ERR_MSG_FILE, result);
@@ -1086,7 +1096,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       content.setExtras(extras);
     }
 
-    sendMessage(conversation, content, options, result);
+    sendMessage(conversation, content, options, null, result);
   }
 
   private void retractMessage(MethodCall call, final Result result) {
