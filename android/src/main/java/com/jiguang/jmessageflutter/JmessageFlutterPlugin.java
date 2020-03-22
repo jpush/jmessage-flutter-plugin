@@ -867,7 +867,6 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         messageSendingOptions = toMessageSendingOptions(params.getJSONObject("messageSendingOptions"));
       }
 
-
     } catch (JSONException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
@@ -977,7 +976,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
         content.setExtras(extras);
       }
 
-      sendMessage(conversation, content, messageSendingOptions, result);
+      sendMessage(conversation, content, messageSendingOptions,  result);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_FILE, ERR_MSG_FILE, result);
