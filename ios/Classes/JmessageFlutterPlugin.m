@@ -371,6 +371,8 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self getHistoryMessages:call result:result];
   } else if([@"getMessageById" isEqualToString:call.method]) {
     [self getMessageById:call result:result];
+  } else if ([@"getMessageByServerMessageId" isEqualToString:call.method]) {
+      [self getMessageByServerMessageId:call result:result];
   } else if([@"deleteMessageById" isEqualToString:call.method]) {
     [self deleteMessageById:call result:result];
   } else if([@"sendInvitationRequest" isEqualToString:call.method]) {
@@ -1201,6 +1203,23 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }];
 }
 
+- (void)getMessageByServerMessageId:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSDictionary *param = call.arguments;
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+      if (error) {
+        result([error flutterError]);
+        return;
+      }
+      
+      JMSGMessage *msg = [conversation messageWithServerMessageId:param[@"serverMessageId"]];
+      if (msg) {
+        result([msg messageToDictionary]);
+      } else {
+        NSError *error = [NSError errorWithDomain:@"message id do not exit!" code: 1 userInfo: nil];
+        result([error flutterError]);
+      }
+    }];
+}
 
 - (void)getMessageById:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
@@ -2697,7 +2716,17 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
  *
  */
 - (void)onReceiveMessageReceiptStatusChangeEvent:(JMSGMessageReceiptStatusChangeEvent *)receiptEvent {
-  
+    JMSGConversation *conversation = receiptEvent.conversation;
+    NSArray *messageList = receiptEvent.messages;
+    NSMutableArray *serverMsgIdList = [NSMutableArray array];
+    for (JMSGMessage *message in messageList) {
+        [serverMsgIdList addObject:message.serverMessageId];
+    }
+    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+    [dic setObject:[conversation conversationToDictionary] forKey:@"conversation"];
+    [dic setObject:serverMsgIdList forKey:@"serverMessageIdList"];
+    
+    [_channel invokeMethod:@"onReceiveMessageReceiptStatusChange" arguments:dic];
 }
 
 

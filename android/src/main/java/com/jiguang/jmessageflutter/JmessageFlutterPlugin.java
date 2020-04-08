@@ -17,6 +17,7 @@ import org.json.JSONException;
 import cn.jpush.im.android.api.callback.GetReceiptDetailsCallback;
 import cn.jpush.im.android.api.content.MessageContent;
 import cn.jpush.im.android.api.enums.PlatformType;
+import cn.jpush.im.android.api.event.MessageReceiptStatusChangeEvent;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -182,6 +184,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       retractMessage(call, result);
     } else if (call.method.equals("getHistoryMessages")) {
       getHistoryMessages(call, result);
+    } else  if (call.method.equals("getMessageByServerMessageId")) {
+      getMessageByServerMessageId(call, result);
     } else if (call.method.equals("getMessageById")) {
       getMessageById(call, result);
     } else if (call.method.equals("deleteMessageById")) {
@@ -1335,6 +1339,34 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     }
 //    TODO: test JSONArray to dart.
     result.success(messageJSONArr);
+  }
+
+  private void getMessageByServerMessageId(MethodCall call, Result result) {
+    HashMap<String, Object> map = call.arguments();
+
+    Conversation conversation;
+    String serverMessageId;
+    try {
+      JSONObject params = new JSONObject(map);
+      conversation = JMessageUtils.getConversation(params);
+
+      if (conversation == null) {
+        handleResult(ERR_CODE_CONVERSATION, "Can't get conversation", result);
+        return;
+      }
+
+      serverMessageId = params.getString("serverMessageId");
+    } catch (JSONException e) {
+      e.printStackTrace();
+      handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+      return;
+    }
+    Message msg = conversation.getMessage(Long.parseLong(serverMessageId));
+    if (msg == null) {
+      result.success(null);
+    } else {
+      result.success(toJson(msg));
+    }
   }
 
   private void getMessageById(MethodCall call, Result result) {
@@ -3150,6 +3182,24 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     JmessageFlutterPlugin.instance.channel.invokeMethod("onRetractMessage", json);
   }
 
+  public void onEventMainThread(MessageReceiptStatusChangeEvent event) throws JSONException {
+    Log.d("Android","onEvent MessageReceiptStatusChangeEvent:");
+
+    Conversation conversation = event.getConversation();
+    List<MessageReceiptStatusChangeEvent.MessageReceiptMeta> list = event.getMessageReceiptMetas();
+    ArrayList<String> serverMessageIdList = new ArrayList();
+    for (MessageReceiptStatusChangeEvent.MessageReceiptMeta meta : list) {
+      String serverMsgId = String.valueOf(meta.getServerMsgId());
+      serverMessageIdList.add(serverMsgId);
+    }
+
+    HashMap json = new HashMap();
+    json.put("conversation", toJson(event.getConversation()));
+    json.put("serverMessageIdList", serverMessageIdList);
+
+    JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveMessageReceiptStatusChange",json);
+  }
+
   /**
    * 透传消息接收事件。
    *
@@ -3297,7 +3347,6 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
     JmessageFlutterPlugin.instance.channel.invokeMethod("onReceiveGroupAdminReject", json);
 
   }
-
 
   // Event Handler - end
 }

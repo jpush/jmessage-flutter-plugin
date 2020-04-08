@@ -236,7 +236,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-
   void addListener() async {
     print('add listener receive ReceiveMessage');
 
@@ -334,6 +333,14 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       print('listener receive event - group admin approval');
 
+    });
+    
+    jmessage.addReceiveMessageReceiptStatusChangelistener((JMConversationInfo conversation, List<String>serverMessageIdList){
+      print("listener receive event - message receipt status change");
+
+      //for (var serverMsgId in serverMessageIdList) {
+      //  jmessage.getMessageByServerMessageId(type: conversation.target, serverMessageId: serverMsgId);
+      //}
     });
   }
 
@@ -1197,7 +1204,6 @@ void verifyMessage(dynamic msg) {
   expect(msg.serverMessageId, isNotNull, reason: 'serverMessageId id is null');
   expect(msg.isSend, isNotNull, reason: 'message isSend is null');
   expect(msg.createTime, isNotNull, reason: 'message createTime is null');
-  expect(msg.extras, isNotNull, reason: 'message extras is null');
   expect(msg.from, isNotNull, reason: 'message from is null');
   verifyUser(msg.from);
 
