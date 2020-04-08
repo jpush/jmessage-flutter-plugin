@@ -53,6 +53,7 @@ typedef JMReceiveChatRoomMessageListener = void Function(List<dynamic> messageLi
 typedef JMReceiveApplyJoinGroupApprovalListener = void Function(JMReceiveApplyJoinGroupApprovalEvent event);
 typedef JMReceiveGroupAdminRejectListener = void Function(JMReceiveGroupAdminRejectEvent event);
 typedef JMReceiveGroupAdminApprovalListener = void Function(JMReceiveGroupAdminApprovalEvent event);
+typedef JMMessageReceiptStatusChangeListener = void Function(JMConversationInfo conversation, List<String>serverMessageIdList);
 
 class JMEventHandlers {
 
@@ -60,18 +61,31 @@ class JMEventHandlers {
     JMEventHandlers._internal();
     factory JMEventHandlers() => _instance;
 
+    /// 收到：消息
     List<JMMessageEventListener> receiveMessage = [];
+    /// 收到：离线消息
     List<JMSyncOfflineMessageListener> syncOfflineMessage = [];
-    List<JMLoginStateChangedListener> loginStateChanged = [];
-    List<JMContactNotifyListener> contactNotify = [];
-    List<JMMessageEventListener> clickMessageNotification = [];
+    /// 收到：漫游消息
     List<JMSyncRoamingMessageListener> syncRoamingMessage = [];
-    List<JMReceiveTransCommandListener> receiveTransCommand = []; // 透传命令
-    List<JMReceiveChatRoomMessageListener> receiveChatRoomMessage = []; // 聊天室消息
+    /// 收到：聊天室消息
+    List<JMReceiveChatRoomMessageListener> receiveChatRoomMessage = [];
+    /// 收到：登录状态发生变更
+    List<JMLoginStateChangedListener> loginStateChanged = [];
+    /// 收到：好友事件
+    List<JMContactNotifyListener> contactNotify = [];
+    /// 收到：触发通知栏点击事件
+    List<JMMessageEventListener> clickMessageNotification = [];
+    /// 收到：透传命令
+    List<JMReceiveTransCommandListener> receiveTransCommand = [];
+    /// 收到：申请入群请求
     List<JMReceiveApplyJoinGroupApprovalListener> receiveApplyJoinGroupApproval = [];
+    /// 收到：管理员拒绝事件
     List<JMReceiveGroupAdminRejectListener> receiveGroupAdminReject = [];
+    /// 收到：管理员审核事件
     List<JMReceiveGroupAdminApprovalListener> receiveGroupAdminApproval = [];
-    
+    /// 收到：消息已读回执事件
+    List<JMMessageReceiptStatusChangeListener> receiveReceiptStatusChangeEvents = [];
+    /// 收到：消息撤回事件
     List<JMMessageRetractListener> retractMessage = [];
 }
 
@@ -166,6 +180,12 @@ class JmessageFlutter {
     removeReceiveGroupAdminApprovalListener(JMReceiveGroupAdminApprovalListener callback) {
       _eventHanders.receiveGroupAdminApproval.removeWhere((cb) => cb == callback);
     }
+    addReceiveMessageReceiptStatusChangelistener(JMMessageReceiptStatusChangeListener callback) {
+      _eventHanders.receiveReceiptStatusChangeEvents.add(callback);
+    }
+    removeMessageReceiptStatusChangelistener(JMMessageReceiptStatusChangeListener callback) {
+      _eventHanders.receiveReceiptStatusChangeEvents.removeWhere((cb) => cb == callback);
+    }
 
     Future<String> get platformVersion async {
       final String version = await _channel.invokeMethod('getPlatformVersion');
@@ -258,6 +278,14 @@ class JmessageFlutter {
           for (JMReceiveGroupAdminApprovalListener cb in _eventHanders.receiveGroupAdminApproval) {
             Map json = call.arguments.cast<dynamic, dynamic>();
             cb(JMReceiveGroupAdminApprovalEvent.fromJson(json));
+          }
+          break;
+        case 'onReceiveMessageReceiptStatusChange':
+          for (JMMessageReceiptStatusChangeListener cb in _eventHanders.receiveReceiptStatusChangeEvents) {
+            Map param = call.arguments.cast<dynamic, dynamic>();
+            List serverMessageIdList = param['serverMessageIdList'];
+            JMConversationInfo conversationInfo = JMConversationInfo.fromJson(param['conversation']);
+            cb(conversationInfo, serverMessageIdList);
           }
           break;
         default:
@@ -737,6 +765,25 @@ class JmessageFlutter {
     }
     //var res = resArr.map((messageMap) => JMNormalMessage.generateMessageFromJson(messageMap)).toList();
     return res;
+  }
+
+  /// 获取本地单条消息
+  /// @param target    聊天对象， JMSingle | JMGroup
+  ///  @param serverMessageId  服务器返回的 serverMessageId，非本地数据库中的消息id，
+  Future<dynamic> getMessageByServerMessageId({
+    @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
+    @required String serverMessageId,
+  }) async {
+    Map param = type.toJson();
+
+    param..addAll({
+      'serverMessageId': serverMessageId,
+    });
+
+    Map msgMap = await _channel.invokeMethod('getMessageByServerMessageId',
+        param..removeWhere((key,value) => value == null));
+
+    return JMNormalMessage.generateMessageFromJson(msgMap);
   }
 
   /**
