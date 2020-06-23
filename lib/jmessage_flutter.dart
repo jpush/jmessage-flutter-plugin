@@ -2442,7 +2442,8 @@ class JMConversationInfo {
       'title': title,
       'conversationType': getStringFromEnum(conversationType),
       'unreadCount': unreadCount,
-      'extras': json.encode(extras),
+      'target': target,
+      'extras': extras,
     };
   }
 
@@ -2451,16 +2452,28 @@ class JMConversationInfo {
             JMConversationType.values, map['conversationType']),
         title = map['title'],
         unreadCount = map['unreadCount'],
-        extras = json.decode(map['extras']) {
+        extras = map['extras'] {
     switch (conversationType) {
       case JMConversationType.single:
-        target = JMUserInfo.fromJson(map['target']);
+        if (map['target'].runtimeType == JMUserInfo) {
+          target = map['target'];
+        } else {
+          target = JMUserInfo.fromJson(map['target']);
+        }
         break;
       case JMConversationType.group:
-        target = JMGroupInfo.fromJson(map['target']);
+        if (map['target'].runtimeType == JMGroupInfo) {
+          target = map['target'];
+        } else {
+          target = JMGroupInfo.fromJson(map['target']);
+        }
         break;
       case JMConversationType.chatRoom:
-        target = JMChatRoomInfo.fromJson(map['target']);
+        if (map['target'].runtimeType == JMChatRoomInfo) {
+          target = map['target'];
+        } else {
+          target = JMChatRoomInfo.fromJson(map['target']);
+        }
         break;
     }
 
