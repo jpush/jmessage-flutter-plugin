@@ -68,7 +68,7 @@ class JMEventHandlers {
     /// 收到：漫游消息
     List<JMSyncRoamingMessageListener> syncRoamingMessage = [];
     /// 收到：聊天室消息
-    List<JMReceiveChatRoomMessageListener> receiveChatRoomMessage = [];
+    Map<String,JMReceiveChatRoomMessageListener> receiveChatRoomMessageMap = Map();
     /// 收到：登录状态发生变更
     List<JMLoginStateChangedListener> loginStateChanged = [];
     /// 收到：好友事件
@@ -126,7 +126,7 @@ class JmessageFlutter {
     removeSyncOfflineMessageListener(JMSyncOfflineMessageListener callback) {
       _eventHanders.syncOfflineMessage.removeWhere((cb) => cb == callback);
     }
-    addSyncRoamingMessageListener(JMSyncRoamingMessageListener callback) {
+    addSyncRoamingMessageListener(JMSyncRoamingMessageListener callback,{String id}) {
       _eventHanders.syncRoamingMessage.add(callback);
     }
     removeSyncRoamingMessageListener(JMSyncRoamingMessageListener callback) {
@@ -156,11 +156,17 @@ class JmessageFlutter {
     removeReceiveTransCommandListener(JMReceiveTransCommandListener callback) {
       _eventHanders.receiveTransCommand.removeWhere((cb) => cb == callback);
     }
-    addReceiveChatRoomMessageListener(JMReceiveChatRoomMessageListener callback) {
-      _eventHanders.receiveChatRoomMessage.add(callback);
+    addReceiveChatRoomMessageListener(String listenerID,JMReceiveChatRoomMessageListener callback) {
+      if (listenerID == null) {
+        print(flutterLog + "'listenerID' is can not be null.");
+        return ;
+      }
+      _eventHanders.receiveChatRoomMessageMap[listenerID] = callback;
     }
-    removeReceiveChatRoomMessageListener(JMReceiveChatRoomMessageListener callback) {
-      _eventHanders.receiveChatRoomMessage.removeWhere((cb) => cb == callback);
+    removeReceiveChatRoomMessageListener(String listenerID) {
+      if(listenerID != null) {
+        _eventHanders.receiveChatRoomMessageMap.remove(listenerID);
+      }
     }
     addReceiveApplyJoinGroupApprovalListener(JMReceiveApplyJoinGroupApprovalListener callback) {
       _eventHanders.receiveApplyJoinGroupApproval.add(callback);
@@ -255,11 +261,12 @@ class JmessageFlutter {
           }
           break;
         case 'onReceiveChatRoomMessage':
-          for (JMReceiveChatRoomMessageListener cb in _eventHanders.receiveChatRoomMessage) {
+          _eventHanders.receiveChatRoomMessageMap.forEach((key, value) {
+            JMReceiveChatRoomMessageListener cb = value;
             List<dynamic> msgJsons = call.arguments.cast();
-            List<dynamic> msgs = msgJsons.map((json) => JMNormalMessage.generateMessageFromJson(json)).toList();
-            cb(msgs);
-          }
+            List<dynamic> msgsList = msgJsons.map((json) => JMNormalMessage.generateMessageFromJson(json)).toList();
+            cb(msgsList);
+          });
           break;
         case 'onReceiveApplyJoinGroupApproval':
           for (JMReceiveApplyJoinGroupApprovalListener cb in _eventHanders.receiveApplyJoinGroupApproval) {

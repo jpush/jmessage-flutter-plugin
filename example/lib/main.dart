@@ -236,13 +236,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
+  static final String chatRoomMsgListenerID = "chatRoomMsgListenerID";//监听聊天室消息的监听id
+  static final String receiveMsgListenerID = "receiveMsgListenerID";//监听消息的监听id
+
+  void removeListener() async {
+    jmessage.removeReceiveChatRoomMessageListener(chatRoomMsgListenerID);
+  }
+
   void addListener() async {
     print('add listener receive ReceiveMessage');
 
     jmessage.addReceiveMessageListener((msg) {//+
       print('listener receive event - message ： ${msg.toJson()}');
-
-      verifyMessage(msg);
 
       setState(() {
         _result = "【收到消息】${msg.toJson()}";
@@ -250,20 +255,21 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     jmessage.addClickMessageNotificationListener((msg) {//+
-      verifyMessage(msg);
       print('listener receive event - click message notification ： ${msg.toJson()}');
     });
 
     jmessage.addSyncOfflineMessageListener((conversation,msgs) {
-      print('receive offline message');
-      verifyConversation(conversation);
-      print('conversation ${conversation}');
-      print('messages ${msgs}');
+      print('listener receive event - sync office message ');
 
-      for (dynamic msg in msgs) {
-        print('msg ${msg}');
+      List<Map> list = [];
+      for (JMNormalMessage msg in msgs) {
+        print('offline msg: ${msg.toJson()}');
+        list.add(msg.toJson());
       }
-      print('listener receive event - sync office message done!');
+
+      setState(() {
+        _result = "【离线消息】${list.toString()}";
+      });
     });
 
     jmessage.addSyncRoamingMessageListener((conversation) {
@@ -285,13 +291,10 @@ class _MyHomePageState extends State<MyHomePage> {
       verifyMessage(msg);
     });
 
-
-    jmessage.addReceiveChatRoomMessageListener((msgs) {//+
-      msgs.map((msg) {
-        verifyMessage(msg);
-      });
+    jmessage.addReceiveChatRoomMessageListener(chatRoomMsgListenerID, (messageList) {
       print('listener receive event - chat room message ');
     });
+
 
     jmessage.addReceiveTransCommandListener((JMReceiveTransCommandEvent event) {
       expect(event.message, isNotNull, reason: 'JMReceiveTransCommandEvent.message is null');
@@ -1047,6 +1050,8 @@ class _MyHomePageState extends State<MyHomePage> {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: new Container(
+        color: Colors.grey,
+        height: double.infinity,
         child: new Column(
           children: <Widget>[
             new Container(
@@ -1120,11 +1125,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             new Container(
-              margin: EdgeInsets.fromLTRB(5, 5, 5, 0),
+              margin: EdgeInsets.fromLTRB(5, 5, 5, 20),
               color: Colors.brown,
               child: Text(_result),
               width: double.infinity,
-              height: 200,
+              constraints: BoxConstraints(minHeight: 200),
+              //height: 300,
             ),
           ],
         ),
