@@ -10,7 +10,9 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:jmessage_flutter_example/group_manage_view.dart';
 import 'package:jmessage_flutter_example/conversation_manage_view.dart';
 
-const String kMockAppkey =  "你自己应用的 AppKey";//'你自己应用的 AppKey';
+import 'package:image_picker/image_picker.dart';
+
+const String kMockAppkey =  "e58a32cb3e4469ebf31867e5";//'你自己应用的 AppKey';
 const String kMockUserName = '0001';
 const String kMockPassword = '1111';
 const String kCommonPassword = '123456a';
@@ -210,6 +212,32 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void demoSendImageMessage() async {
+    print(flutter_log + "demoSendImageMessage " + usernameTextEC2.text);
+
+    setState(() {
+      _loading = true;
+    });
+    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
+      setState(() {
+        _loading = false;
+        _result = "【发消息】对方 username 不能为空";
+      });
+      return;
+    }
+    String username = usernameTextEC2.text;
+
+    PickedFile selectImageFile = await ImagePicker().getImage(source: ImageSource.gallery);
+
+    JMSingle type = JMSingle.fromJson({"username":username});
+    JMImageMessage msg = await jmessage.sendImageMessage(type: type, path: selectImageFile.path);
+
+    setState(() {
+      _loading = false;
+      _result = "【图片消息】${msg.toJson()}";
+    });
+  }
+
   void demoSendLocationMessage() async {
     print(flutter_log + "demoSendLocationMessage " + usernameTextEC2.text);
 
@@ -248,6 +276,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
     jmessage.addReceiveMessageListener((msg) {//+
       print('listener receive event - message ： ${msg.toJson()}');
+
+      /* 下载原图测试
+      if (msg is JMImageMessage) {
+        print('收到一条图片消息' + 'id='+ msg.id + ',serverMessageId='+msg.serverMessageId);
+        print('开始下载图片消息的原图');
+        jmessage.downloadOriginalImage(target: msg.from, messageId: msg.id).then((value) {
+          print('下载图片--回调-1');
+          print('图片消息，filePath = ' + value['filePath']);
+          print('图片消息，messageId = ' + value['messageId'].toString());
+          print('下载图片--回调-2');
+        });
+      }
+       */
+
 
       setState(() {
         _result = "【收到消息】${msg.toJson()}";
@@ -1089,6 +1131,8 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 new Text(" "),
                 new CustomButton(title: "发送文本消息", onPressed: demoSendTextMessage),
+                new Text(" "),
+                new CustomButton(title: "发送图片消息", onPressed:demoSendImageMessage),
                 new Text(" "),
                 new CustomButton(title: "发送位置消息", onPressed:demoSendLocationMessage),
               ],
