@@ -216,6 +216,8 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       addGroupMembers(call, result);
     } else if (call.method.equals("removeGroupMembers")) {
       removeGroupMembers(call, result);
+    } else if (call.method.equals("getMessageHaveReadStatus")) {
+      getMessageHaveReadStatus(call, result);
     } else if (call.method.equals("exitGroup")) {
       exitGroup(call, result);
     } else if (call.method.equals("getGroupMembers")) {
@@ -351,7 +353,7 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       return;
     }
   }
-  
+
   private void userRegister(MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     String username, password;
