@@ -53,7 +53,7 @@ typedef JMReceiveChatRoomMessageListener = void Function(List<dynamic> messageLi
 typedef JMReceiveApplyJoinGroupApprovalListener = void Function(JMReceiveApplyJoinGroupApprovalEvent event);
 typedef JMReceiveGroupAdminRejectListener = void Function(JMReceiveGroupAdminRejectEvent event);
 typedef JMReceiveGroupAdminApprovalListener = void Function(JMReceiveGroupAdminApprovalEvent event);
-typedef JMMessageReceiptStatusChangeListener = void Function(JMConversationInfo conversation, List<String>serverMessageIdList);
+typedef JMMessageReceiptStatusChangeListener = void Function(JMConversationInfo conversation, List serverMessageIdList);
 
 class JMEventHandlers {
 
@@ -813,6 +813,28 @@ class JmessageFlutter {
     Map msgMap = await _channel.invokeMethod('getMessageById', 
       param..removeWhere((key,value) => value == null));
     
+    return JMNormalMessage.generateMessageFromJson(msgMap);
+  }
+  /**
+    * 设置消息已读
+    *
+    * @param target    聊天对象， JMSingle | JMGroup
+    * @param messageId 本地数据库中的消息id，非 serverMessageId
+    *
+    * */
+  Future<dynamic> setHaveRead({
+    @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
+    @required String messageId,
+  }) async {
+    Map param = type.toJson();
+
+    param..addAll({
+        'messageId': messageId,
+      });
+
+    Map msgMap = await _channel.invokeMethod('setHaveRead',
+      param..removeWhere((key,value) => value == null));
+
     return JMNormalMessage.generateMessageFromJson(msgMap);
   }
 
@@ -2503,6 +2525,17 @@ class JMConversationInfo {
       path: path,
       sendOption: sendOption,
       extras: extras,
+    );
+    return msg;
+  }
+
+  Future<JMFileMessage> setHaveRead({
+    @required dynamic type, /// (JMSingle | JMGroup | JMChatRoom)
+    @required String messageId,
+  }) async {
+    JMFileMessage msg = await JmessageFlutter().setHaveRead(
+      type: target.targetType,
+      messageId: messageId
     );
     return msg;
   }
