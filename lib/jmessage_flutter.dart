@@ -1529,8 +1529,8 @@ class JmessageFlutter {
     
     await _channel.invokeMethod('processApplyJoinGroup',{
       'events': events,
-      'isAgree': isAgree == 0 ? false : true,
-      'isRespondInviter': isRespondInviter == 0 ? false : true,
+      'isAgree': isAgree,
+      'isRespondInviter': isRespondInviter,
       'reason': reason
     }..removeWhere((key, value) => value == null));
     
