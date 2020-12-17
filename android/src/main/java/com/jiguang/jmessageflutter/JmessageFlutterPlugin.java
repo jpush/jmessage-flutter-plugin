@@ -1719,12 +1719,14 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
 
   }
 
-  private void updateGroupInfo(MethodCall call, final Result result) {
+  private void updateGroupInfo(final MethodCall call, final Result result) {
     HashMap<String, Object> map = call.arguments();
     long groupId;
+    final String name;
     try {
       JSONObject params = new JSONObject(map);
       groupId = Long.parseLong(params.getString("id"));
+      name = params.getString("newName");
     } catch (JSONException e) {
       e.printStackTrace();
       handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
@@ -1735,7 +1737,18 @@ public class JmessageFlutterPlugin implements MethodCallHandler {
       @Override
       public void gotResult(int status, String desc, GroupInfo groupInfo) {
         if (status == 0) {
-          handleResult(toJson(groupInfo), status, desc, result);
+          groupInfo.updateName(name, new BasicCallback(){
+
+            @Override
+            public void gotResult(int i, String s) {
+              if (i == 0) {
+                handleResult(new HashMap(), i, s, result);
+              }else{
+                handleResult(i, s, result);
+              }
+            }
+          });
+
 
         } else {
           handleResult(status, desc, result);
