@@ -17,7 +17,7 @@ dependencies:
 
 //pub.dev 集成
 dependencies:
-  jmessage_flutter: 2.0.3
+  jmessage_flutter: 2.0.5
 ```
 
 
