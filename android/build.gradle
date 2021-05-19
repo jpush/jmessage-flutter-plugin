@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     repositories {
+        mavenCentral()
         google()
         jcenter()
     }
@@ -14,6 +15,7 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
+        mavenCentral()
         google()
         jcenter()
     }
@@ -36,5 +38,5 @@ android {
 
 dependencies {
     implementation 'cn.jiguang.sdk:jmessage:2.9.2'
-    implementation 'cn.jiguang.sdk:jcore:2.6.0'
+    implementation 'cn.jiguang.sdk:jcore:2.7.8'
 }
