@@ -1,4 +1,4 @@
-## 2.0.7
+## 2.1.0
 +适配：适配 null safety
 ## 2.0.5
 + 升级：Android jcore sdk 升级到 2.7.8
