@@ -8,3 +8,6 @@ pubspec.lock
 build/
 .idea/
 flutter.jar
+example/.flutter-plugins-dependencies
+jmessage_flutter_android.iml
+example/ios/Flutter/flutter_export_environment.sh
