@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jmessage_flutter/jmessage_flutter.dart';
 import 'package:jmessage_flutter_example/main.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class GroupManageView extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _GroupManageViewState extends State<GroupManageView> {
   bool _loading = false;
   String _result = "选择需要操作的群组";
   int selectIndex = -1;
-  JMGroupInfo selectedGroupInfo;
+  JMGroupInfo? selectedGroupInfo;
 
   var usernameTextEC1 = new TextEditingController();
 
@@ -135,7 +135,7 @@ class _GroupManageViewState extends State<GroupManageView> {
         selected: selectIndex == index,
         onTap: () {
           print("点击了第【${index + 1}】行");
-          String gid;
+          String? gid;
           if (object is String) {
             gid = object;
           } else if (object is JMGroupInfo) {
@@ -150,7 +150,7 @@ class _GroupManageViewState extends State<GroupManageView> {
     );
   }
 
-  void demoGetGroupInfo(String gid) async {
+  void demoGetGroupInfo(String? gid) async {
     print("demoGetGroupInfo gid = $gid");
 
     setState(() {
@@ -182,7 +182,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       _loading = true;
     });
 
-    String gid = selectedGroupInfo.id;
+    String gid = selectedGroupInfo!.id;
     List<JMGroupMemberInfo> res = await jmessage.getGroupMembers(id: gid);
     print("群组【gid:$gid】的群成员列表：");
     for (JMGroupMemberInfo member in res) {
@@ -211,7 +211,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       });
       return;
     }
-    String gid = selectedGroupInfo.id;
+    String gid = selectedGroupInfo!.id;
     String username = usernameTextEC1.text;
     await jmessage.addGroupMembers(id: gid, usernameArray: [username]);
     setState(() {
@@ -237,7 +237,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       });
       return;
     }
-    String gid = selectedGroupInfo.id;
+    String gid = selectedGroupInfo!.id;
     String username = usernameTextEC1.text;
     await jmessage.removeGroupMembers(id: gid, usernames: [username]);
 
@@ -262,7 +262,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       return;
     }
 
-    if (selectedGroupInfo.groupType == JMGroupType.private) {
+    if (selectedGroupInfo!.groupType == JMGroupType.private) {
       setState(() {
         _loading = false;
         _result = "【申请加入群组】该群为私有群，可直接加入";
@@ -270,7 +270,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       return;
     }
 
-    String gid = selectedGroupInfo.id;
+    String gid = selectedGroupInfo!.id;
     await jmessage.applyJoinGroup(groupId: gid);
 
     setState(() {
@@ -304,8 +304,8 @@ class _GroupManageViewState extends State<GroupManageView> {
       _loading = true;
     });
 
-    JMUserInfo userInfo = await jmessage.getMyInfo();
-    String appkey = userInfo.appKey;
+    JMUserInfo? userInfo = await jmessage.getMyInfo();
+    String? appkey = userInfo!.appKey;
 
     List<JMGroupInfo> groupList =
         await jmessage.getPublicGroupInfos(appKey: appkey, start: 0, count: 20);
@@ -353,7 +353,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       return;
     }
 
-    String gid = selectedGroupInfo.id;
+    String gid = selectedGroupInfo!.id;
     JMGroup group = JMGroup.fromJson({"groupId": gid});
     JMConversationInfo conversationInfo =
         await jmessage.createConversation(target: group);

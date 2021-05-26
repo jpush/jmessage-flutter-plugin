@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jmessage_flutter/jmessage_flutter.dart';
 import 'package:jmessage_flutter_example/main.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class ConversationManageView extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class _ConversationManageViewState extends State<ConversationManageView> {
   bool _loading = false;
   String _result = "请选择需要操作的会话";
   int selectIndex = -1;
-  JMConversationInfo selectConversationInfo;
+  JMConversationInfo? selectConversationInfo;
 
   @override
   void initState() {
@@ -159,7 +159,7 @@ class _ConversationManageViewState extends State<ConversationManageView> {
       _loading = true;
     });
 
-    JMTextMessage msg = await selectConversationInfo.sendTextMessage(
+    JMTextMessage msg = await selectConversationInfo!.sendTextMessage(
         text: "send msg queen index $textIndex");
     setState(() {
       _loading = false;
@@ -183,7 +183,7 @@ class _ConversationManageViewState extends State<ConversationManageView> {
       _loading = true;
     });
 
-    selectConversationInfo
+    selectConversationInfo!
         .getHistoryMessages(from: 0, limit: 20)
         .then((msgList) {
       for (JMNormalMessage msg in msgList) {

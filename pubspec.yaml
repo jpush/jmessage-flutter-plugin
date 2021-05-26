@@ -1,6 +1,6 @@
 name: jmessage_flutter
 description: JIGUANG officially supported JMessage Flutter plugin (Android & iOS). 极光推送官方支持的 Flutter 插件（Android & iOS）(https://www.jiguang.cn).
-version: 2.0.7
+version: 2.1.2
 homepage: https://www.jiguang.cn
 
 environment:
@@ -12,12 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-dev_dependencies:
-  test: ^1.17.4
-  mockito: ^5.0.7
-  flutter_test:
-    sdk: flutter
-    
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
 
