@@ -457,7 +457,7 @@ class JmessageFlutter {
   }
 
   Future<JMUserInfo?> getMyInfo() async {
-    Map userJson = await _channel.invokeMethod('getMyInfo');
+    Map? userJson = await _channel.invokeMethod('getMyInfo');
     if (userJson == null) {
       return null;
     } else {
@@ -801,6 +801,47 @@ class JmessageFlutter {
 
     Map resMap = await _channel.invokeMethod(
         'sendFileMessage', param..removeWhere((key, value) => value == null));
+    var res = JMNormalMessage.generateMessageFromJson(resMap);
+    return res;
+  }
+
+  Future<JMVideoMessage> sendVideoMessage({
+    @required dynamic type,
+
+    /// (JMSingle | JMGroup | JMChatRoom)
+    String? thumbImagePath,
+    String? thumbFormat,
+    @required String? videoPath,
+    String? videoFileName,
+    int? duration,
+    JMMessageSendOptions? sendOption,
+    Map<dynamic, dynamic>? extras,
+  }) async {
+    Map param = type.toJson();
+    Map optionMap = {};
+    if (sendOption != null) {
+      optionMap = {
+        'messageSendingOptions': sendOption.toJson()
+          ..removeWhere((key, value) => value == null)
+      };
+    }
+
+    if (extras != null) {
+      param..addAll({'extras': extras});
+    }
+
+    param
+      ..addAll(optionMap)
+      ..addAll({
+        'thumbImagePath': thumbImagePath,
+        'thumbFormat': thumbFormat,
+        'videoPath': videoPath,
+        'videoFileName': videoFileName,
+        'duration': duration
+      });
+
+    Map resMap = await _channel.invokeMethod(
+        'sendVideoMessage', param..removeWhere((key, value) => value == null));
     var res = JMNormalMessage.generateMessageFromJson(resMap);
     return res;
   }
@@ -2033,33 +2074,37 @@ class JMNormalMessage {
     switch (type) {
       case JMMessageType.text:
         return JMTextMessage.fromJson(json);
-        break;
       case JMMessageType.image:
         return JMImageMessage.fromJson(json);
-        break;
       case JMMessageType.voice:
         return JMVoiceMessage.fromJson(json);
-        break;
       case JMMessageType.location:
         return JMLocationMessage.fromJson(json);
-        break;
       case JMMessageType.file:
         return JMFileMessage.fromJson(json);
-        break;
       case JMMessageType.custom:
         return JMCustomMessage.fromJson(json);
-        break;
       case JMMessageType.event:
         return JMEventMessage.fromJson(json);
-        break;
       case JMMessageType.prompt:
         return JMPromptMessage.fromJson(json);
-        break;
+      case JMMessageType.video:
+        return JMPromptMessage.fromJson(json);
     }
   }
 }
 
-enum JMMessageType { text, image, voice, file, custom, location, event, prompt }
+enum JMMessageType {
+  text,
+  image,
+  voice,
+  file,
+  custom,
+  location,
+  event,
+  prompt,
+  video
+}
 
 class JMTextMessage extends JMNormalMessage {
   final JMMessageType type = JMMessageType.text;
@@ -2143,6 +2188,33 @@ class JMLocationMessage extends JMNormalMessage {
         latitude = json['latitude'],
         scale = json['scale'],
         address = json['address'],
+        super.fromJson(json);
+}
+
+class JMVideoMessage extends JMNormalMessage {
+  String videoPath; // 视频地址
+  String thumbFormat; //视频缩略图格式名
+  int duration; // 视频时长
+  String thumbImagePath; // 视频缩略图
+  String videoFileName; // 视频名称
+
+  Map toJson() {
+    var json = super.toJson();
+    json['thumbImagePath'] = thumbImagePath;
+    json['videoPath'] = videoPath;
+    json['duration'] = duration;
+    json['thumbImagePath'] = thumbImagePath;
+    json['videoFileName'] = videoFileName;
+
+    return json;
+  }
+
+  JMVideoMessage.fromJson(Map<dynamic, dynamic> json)
+      : videoPath = json['videoPath'],
+        thumbFormat = json['thumbFormat'],
+        duration = json['duration'],
+        thumbImagePath = json['thumbImagePath'],
+        videoFileName = json['videoFileName'],
         super.fromJson(json);
 }
 
