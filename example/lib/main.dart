@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,7 @@ import 'package:jmessage_flutter_example/conversation_manage_view.dart';
 import 'package:jmessage_flutter_example/group_manage_view.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:platform/platform.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 const String kMockAppkey = "e58a32cb3e4469ebf31867e5"; //'你自己应用的 AppKey';
 const String kMockUserName = '0001';
@@ -258,6 +261,48 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _loading = false;
       _result = "【地理位置消息】${msg.toJson()}";
+    });
+  }
+
+  void demoSendVideoMessage() async {
+    print(flutter_log + "demoSendVideoMessage " + usernameTextEC2.text);
+
+    setState(() {
+      _loading = true;
+    });
+
+    if (usernameTextEC2.text == "") {
+      setState(() {
+        _loading = false;
+        _result = "【发消息】对方 username 不能为空";
+      });
+      return;
+    }
+    String username = usernameTextEC2.text;
+
+    PickedFile? selectVideoPath = await ImagePicker().getVideo(
+        source: ImageSource.gallery, maxDuration: const Duration(seconds: 10));
+
+    String? thumbnailPath = await VideoThumbnail.thumbnailFile(
+      video: selectVideoPath!.path,
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 128,
+      // specify the width of the thumbnail, let the height auto-scaled to keep the source aspect ratio
+      quality: 25,
+    );
+
+    // print('selectVideoPath ======${selectVideoPath.path},thumbnailPath = $thumbnailPath');
+    JMSingle type = JMSingle.fromJson({"username": username});
+    JMVideoMessage msg = await jmessage.sendVideoMessage(
+        type: type,
+        duration: null,
+        thumbFormat: "",
+        videoFileName: "",
+        thumbImagePath: thumbnailPath,
+        videoPath: selectVideoPath.path);
+    setState(() {
+      _loading = false;
+      _result = "【视频消息】${msg.toJson()}";
     });
   }
 
@@ -1124,6 +1169,9 @@ class _MyHomePageState extends State<MyHomePage> {
             new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                new Text(" "),
+                new CustomButton(
+                    title: "发送视频消息", onPressed: demoSendVideoMessage),
                 new Text(" "),
                 new CustomButton(
                     title: "会话管理界面",

@@ -1,3 +1,5 @@
+## 2.1.4
++新增：新增发送视频接口 sendVoiceMessage
 ## 2.1.2
 +升级：升级 android jcore 2.8.2
 ## 2.1.0
