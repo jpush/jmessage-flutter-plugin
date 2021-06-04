@@ -186,24 +186,25 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     }
       case kJMSGContentTypeVideo:{
           NSString *videoPath = param[@"videoPath"];
+          int duration = 0;
           if([[NSFileManager defaultManager] fileExistsAtPath: videoPath]){
               videoPath = videoPath;
+              AVURLAsset * asset = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:videoPath]];
+              CMTime time = [asset duration];
+              int seconds = ceil(time.value/time.timescale);
+              duration = seconds;
+
           } else {
             return nil;
           }
+
           NSString *thumbImagePath = param[@"thumbImagePath"];
           NSData *thumbImageData = [NSData data];
           if([[NSFileManager defaultManager] fileExistsAtPath: thumbImagePath]){
               thumbImageData = [NSData dataWithContentsOfFile:thumbImagePath];
           }
-          NSNumber *duration = param[@"duration"];
-          if (duration && [duration isKindOfClass:[NSNumber class]]) {
-              duration = duration;
-          }else {
-              duration = @(0);
-          }
 
-          content = [[JMSGVideoContent alloc] initWithVideoData:[NSData dataWithContentsOfFile:videoPath] thumbData:thumbImageData duration:duration];
+          content = [[JMSGVideoContent alloc] initWithVideoData:[NSData dataWithContentsOfFile:videoPath] thumbData:thumbImageData duration:@(duration)];
           JMSGVideoContent *videoContent = content;
 
           NSString *videoFileName = param[@"videoFileName"];
