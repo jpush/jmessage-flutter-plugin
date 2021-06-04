@@ -27,6 +27,7 @@ import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.LocationContent;
 import cn.jpush.im.android.api.content.MessageContent;
 import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.content.VideoContent;
 import cn.jpush.im.android.api.content.VoiceContent;
 import cn.jpush.im.android.api.enums.ConversationType;
 import cn.jpush.im.android.api.enums.MessageDirect;
@@ -96,7 +97,7 @@ class JsonUtils {
 
         result.put("username", userInfo.getUserName() != null ? userInfo.getUserName() : "");
         result.put("appKey", userInfo.getAppKey());
-        result.put("nickname", userInfo.getNickname() != null ? userInfo.getNickname(): "");
+        result.put("nickname", userInfo.getNickname() != null ? userInfo.getNickname() : "");
         if (userInfo.getAvatarFile() != null) {
             result.put("avatarThumbPath", userInfo.getAvatarFile().getAbsolutePath());
         } else {
@@ -116,7 +117,7 @@ class JsonUtils {
             result.put("birthday", "");
         }
 
-        result.put("region", userInfo.getRegion() != null ? userInfo.getRegion() :"");
+        result.put("region", userInfo.getRegion() != null ? userInfo.getRegion() : "");
         result.put("signature", userInfo.getSignature() != null ? userInfo.getSignature() : "");
         result.put("address", userInfo.getAddress() != null ? userInfo.getAddress() : "");
         result.put("noteName", userInfo.getNotename() != null ? userInfo.getNotename() : "");
@@ -137,7 +138,8 @@ class JsonUtils {
         result.put("id", String.valueOf(groupInfo.getGroupID()));
 
         switch (groupInfo.getGroupType()) {
-            case public_group: {}
+            case public_group: {
+            }
             result.put("groupType", "public");
             break;
             default:
@@ -193,9 +195,10 @@ class JsonUtils {
         result.put("avatarThumbPath", groupInfo.getAvatar());
         result.put("maxMemberCount", groupInfo.getMaxMemberCount());//String.valueOf(groupInfo.getMaxMemberCount())
         switch (groupInfo.getGroupType()) {
-            case public_group: {}
-                result.put("groupType", "public");
-                break;
+            case public_group: {
+            }
+            result.put("groupType", "public");
+            break;
             default:
                 result.put("groupType", "private");
                 break;
@@ -217,20 +220,20 @@ class JsonUtils {
 
         HashMap targetJson = null;
         switch (msg.getTargetType()) {
-        case single:
-            if (isSend) { // 消息发送
-                targetJson = toJson((UserInfo) msg.getTargetInfo());
-            } else { // 消息接收
-                targetJson = toJson(JMessageClient.getMyInfo());
-            }
-            break;
-        case group:
-            targetJson = toJson((GroupInfo) msg.getTargetInfo());
-            break;
-        case chatroom:
-            targetJson = toJson((ChatRoomInfo) msg.getTargetInfo());
-            break;
-        default:
+            case single:
+                if (isSend) { // 消息发送
+                    targetJson = toJson((UserInfo) msg.getTargetInfo());
+                } else { // 消息接收
+                    targetJson = toJson(JMessageClient.getMyInfo());
+                }
+                break;
+            case group:
+                targetJson = toJson((GroupInfo) msg.getTargetInfo());
+                break;
+            case chatroom:
+                targetJson = toJson((ChatRoomInfo) msg.getTargetInfo());
+                break;
+            default:
         }
         result.put("target", targetJson);
         switch (msg.getStatus()) {
@@ -269,84 +272,92 @@ class JsonUtils {
         result.put("createTime", msg.getCreateTime());
 
         switch (msg.getContentType()) {
-        case text:
-            result.put("type", "text");
-            result.put("text", ((TextContent) content).getText());
-            break;
-        case image:
-            result.put("type", "image");
-            result.put("thumbPath", ((ImageContent) content).getLocalThumbnailPath());
-            break;
-        case voice:
-            result.put("type", "voice");
-            result.put("path", ((VoiceContent) content).getLocalPath());
-            result.put("duration", ((VoiceContent) content).getDuration() + 0.0);
-            break;
-        case file:
-            result.put("type", "file");
-            result.put("fileName", ((FileContent) content).getFileName());
-            break;
-        case custom:
-            result.put("type", "custom");
-            Map<String, String> customObject = ((CustomContent) content).getAllStringValues();
-            result.put("customObject", toJson(customObject));
-            break;
-        case location:
-            result.put("type", "location");
-            result.put("latitude", ((LocationContent) content).getLatitude().doubleValue());
-            result.put("longitude", ((LocationContent) content).getLongitude().doubleValue());
-            result.put("address", ((LocationContent) content).getAddress());
-            result.put("scale", ((LocationContent) content).getScale().intValue());
-            break;
-        case eventNotification:
-            result.put("type", "event");
-            List usernameList = ((EventNotificationContent) content).getUserNames();
-            if (usernameList != null) {
-                result.put("usernames", toJson(usernameList));
-            }
-            switch (((EventNotificationContent) content).getEventNotificationType()) {
-            case group_member_added:
-                // 群成员加群事件
-                result.put("eventType", "group_member_added");
+            case text:
+                result.put("type", "text");
+                result.put("text", ((TextContent) content).getText());
                 break;
-            case group_member_removed:
-                // 群成员被踢事件
-                result.put("eventType", "group_member_removed");
+            case image:
+                result.put("type", "image");
+                result.put("thumbPath", ((ImageContent) content).getLocalThumbnailPath());
                 break;
-            case group_member_exit:
-                // 群成员退群事件
-                result.put("eventType", "group_member_exit");
+            case voice:
+                result.put("type", "voice");
+                result.put("path", ((VoiceContent) content).getLocalPath());
+                result.put("duration", ((VoiceContent) content).getDuration() + 0.0);
                 break;
-            case group_info_updated:
-                result.put("eventType", "group_info_updated");
+            case file:
+                result.put("type", "file");
+                result.put("fileName", ((FileContent) content).getFileName());
                 break;
-            case group_member_keep_silence:
-                result.put("eventType", "group_member_keep_silence");
+            case custom:
+                result.put("type", "custom");
+                Map<String, String> customObject = ((CustomContent) content).getAllStringValues();
+                result.put("customObject", toJson(customObject));
                 break;
-            case group_member_keep_silence_cancel:
-                result.put("eventType", "group_member_keep_silence_cancel");
+            case location:
+                result.put("type", "location");
+                result.put("latitude", ((LocationContent) content).getLatitude().doubleValue());
+                result.put("longitude", ((LocationContent) content).getLongitude().doubleValue());
+                result.put("address", ((LocationContent) content).getAddress());
+                result.put("scale", ((LocationContent) content).getScale().intValue());
                 break;
-            case group_keeper_added:
-                result.put("eventType", "group_keeper_added");
+            case video:
+                result.put("type", "video");
+                result.put("duration", ((VideoContent) content).getDuration());
+                result.put("videoPath", ((VideoContent) content).getVideoLocalPath());
+                result.put("thumbImagePath", ((VideoContent) content).getThumbLocalPath());
+                result.put("videoFileName", ((VideoContent) content).getFileName());
+                result.put("thumbFormat", ((VideoContent) content).getThumbFormat());
                 break;
-            case group_keeper_removed:
-                result.put("eventType", "group_keeper_removed");
-                break;
-            case group_dissolved:
-                // 解散群组事件
-                result.put("eventType", "group_dissolved");
-                break;
-            case group_owner_changed:
-                // 移交群组事件
-                result.put("eventType", "group_owner_changed");
-                break;
-            case group_type_changed:
-                // 移交群组事件
-                result.put("eventType", "group_type_changed");
-                break;
+            case eventNotification:
+                result.put("type", "event");
+                List usernameList = ((EventNotificationContent) content).getUserNames();
+                if (usernameList != null) {
+                    result.put("usernames", toJson(usernameList));
+                }
+                switch (((EventNotificationContent) content).getEventNotificationType()) {
+                    case group_member_added:
+                        // 群成员加群事件
+                        result.put("eventType", "group_member_added");
+                        break;
+                    case group_member_removed:
+                        // 群成员被踢事件
+                        result.put("eventType", "group_member_removed");
+                        break;
+                    case group_member_exit:
+                        // 群成员退群事件
+                        result.put("eventType", "group_member_exit");
+                        break;
+                    case group_info_updated:
+                        result.put("eventType", "group_info_updated");
+                        break;
+                    case group_member_keep_silence:
+                        result.put("eventType", "group_member_keep_silence");
+                        break;
+                    case group_member_keep_silence_cancel:
+                        result.put("eventType", "group_member_keep_silence_cancel");
+                        break;
+                    case group_keeper_added:
+                        result.put("eventType", "group_keeper_added");
+                        break;
+                    case group_keeper_removed:
+                        result.put("eventType", "group_keeper_removed");
+                        break;
+                    case group_dissolved:
+                        // 解散群组事件
+                        result.put("eventType", "group_dissolved");
+                        break;
+                    case group_owner_changed:
+                        // 移交群组事件
+                        result.put("eventType", "group_owner_changed");
+                        break;
+                    case group_type_changed:
+                        // 移交群组事件
+                        result.put("eventType", "group_type_changed");
+                        break;
+                    default:
+                }
             default:
-            }
-        default:
         }
         return result;
     }
@@ -412,7 +423,7 @@ class JsonUtils {
             json.put("conversationType", "group");
             json.put("target", toJson(targetInfo));
         } else if (conversation.getType() == ConversationType.chatroom) {
-            ChatRoomInfo chatRoom =(ChatRoomInfo) conversation.getTargetInfo();
+            ChatRoomInfo chatRoom = (ChatRoomInfo) conversation.getTargetInfo();
             json.put("target", toJson(chatRoom));
             json.put("conversationType", "chatRoom");
         }
@@ -430,7 +441,7 @@ class JsonUtils {
             json.put("extras", new HashMap());
         }
 
-        Log.d("flutter plugin","native the conversation:" + json.toString());
+        Log.d("flutter plugin", "native the conversation:" + json.toString());
 
         return json;
     }

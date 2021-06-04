@@ -184,13 +184,42 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       content = [[JMSGCustomContent alloc] initWithCustomDictionary: param[@"customObject"]];
       break;
     }
-      
+      case kJMSGContentTypeVideo:{
+          NSString *videoPath = param[@"videoPath"];
+          int duration = 0;
+          if([[NSFileManager defaultManager] fileExistsAtPath: videoPath]){
+              videoPath = videoPath;
+              AVURLAsset * asset = [AVURLAsset assetWithURL:[NSURL fileURLWithPath:videoPath]];
+              CMTime time = [asset duration];
+              int seconds = ceil(time.value/time.timescale);
+              duration = seconds;
+
+          } else {
+            return nil;
+          }
+
+          NSString *thumbImagePath = param[@"thumbImagePath"];
+          NSData *thumbImageData = [NSData data];
+          if([[NSFileManager defaultManager] fileExistsAtPath: thumbImagePath]){
+              thumbImageData = [NSData dataWithContentsOfFile:thumbImagePath];
+          }
+
+          content = [[JMSGVideoContent alloc] initWithVideoData:[NSData dataWithContentsOfFile:videoPath] thumbData:thumbImageData duration:@(duration)];
+          JMSGVideoContent *videoContent = content;
+
+          NSString *videoFileName = param[@"videoFileName"];
+          if (videoFileName && [videoFileName isKindOfClass:[NSString class]]) {
+              videoContent.fileName = videoFileName;
+          }
+          break;
+      }
+
     default:
       return nil;
   }
-  
+
   JMSGConversationType targetType = [self convertStringToConvsersationType:param[@"type"]];
-  
+
   switch (targetType) {
     case kJMSGConversationTypeSingle:{
       message = [JMSGMessage createSingleMessageWithContent:content username:param[@"username"]];
@@ -200,13 +229,13 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       message = [JMSGMessage createGroupMessageWithContent:content groupId:param[@"groupId"]];
       break;
     }
-      
+
     case kJMSGConversationTypeChatRoom:{
       message = [JMSGMessage createChatRoomMessageWithContent:content chatRoomId:param[@"roomId"]];
       break;
     }
   }
-  
+
   if (message) {
     if (param[@"extras"] && [param[@"extras"] isKindOfClass: [NSDictionary class]]) {
       NSDictionary *extras = param[@"extras"];
@@ -224,27 +253,31 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if ([str isEqualToString:@"text"]) {
     return kJMSGContentTypeText;
   }
-  
+
   if ([str isEqualToString:@"image"]) {
     return kJMSGContentTypeImage;
   }
-  
+
   if ([str isEqualToString:@"voice"]) {
     return kJMSGContentTypeVoice;
   }
-  
+
   if ([str isEqualToString:@"location"]) {
     return kJMSGContentTypeLocation;
   }
-  
+
   if ([str isEqualToString:@"file"]) {
     return kJMSGContentTypeFile;
   }
-  
+
   if ([str isEqualToString:@"custom"]) {
     return kJMSGContentTypeCustom;
   }
-  
+
+  if ([str isEqualToString:@"video"]) {
+    return kJMSGContentTypeVideo;
+  }
+
   return kJMSGContentTypeUnknown;
 }
 
@@ -252,36 +285,36 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if ([str isEqualToString:@"group"]) {
     return kJMSGConversationTypeGroup;
   }
-  
+
   if ([str isEqualToString:@"chatRoom"]) {
     return kJMSGConversationTypeChatRoom;
   }
-  
+
   return kJMSGConversationTypeSingle;
 }
 
 - (JMSGGroupType)convertStringToGroupType:(NSString *)str {
-  
+
   if (str == nil) {
     return kJMSGGroupTypePrivate;
   }
-  
+
   if ([str isEqualToString:@"public"]) {
     return kJMSGGroupTypePublic;
   }
-  
+
   return kJMSGGroupTypePrivate;
 }
 
 - (JMSGOptionalContent *)convertDicToJMSGOptionalContent:(NSDictionary *)dic {
   JMSGCustomNotification *customNotification = [[JMSGCustomNotification alloc] init];
   JMSGOptionalContent *optionlContent = [[JMSGOptionalContent alloc] init];
-  
+
   if(dic[@"isShowNotification"]) {
     NSNumber *isShowNotification = dic[@"isShowNotification"];
     optionlContent.noSaveNotification = ![isShowNotification boolValue];
   }
-  
+
   if(dic[@"isRetainOffline"]) {
     NSNumber *isRetainOffline = dic[@"isRetainOffline"];
     optionlContent.noSaveOffline = ![isRetainOffline boolValue];
@@ -290,22 +323,22 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     NSNumber *needReadReceipt =  dic[@"needReadReceipt"];
     optionlContent.needReadReceipt = [needReadReceipt boolValue];
   }
-  
+
   if(dic[@"isCustomNotificationEnabled"]) {
     NSNumber *isCustomNotificationEnabled = dic[@"isCustomNotificationEnabled"];
     customNotification.enabled= [isCustomNotificationEnabled boolValue];
   }
-  
+
   if(dic[@"notificationTitle"]) {
     customNotification.title = dic[@"notificationTitle"];
   }
-  
+
   if(dic[@"notificationText"]) {
     customNotification.alert = dic[@"notificationText"];
   }
-    
+
   optionlContent.customNotification = customNotification;
-  
+
   return optionlContent;
 }
 
@@ -365,6 +398,8 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self sendLocationMessage:call result:result];
   } else if([@"sendFileMessage" isEqualToString:call.method]) {
     [self sendFileMessage:call result:result];
+  } else if([@"sendVideoMessage" isEqualToString:call.method]) {
+    [self sendVideoMessage:call result:result];
   } else if([@"retractMessage" isEqualToString:call.method]) {
     [self retractMessage:call result:result];
   } else if([@"getHistoryMessages" isEqualToString:call.method]) {
@@ -523,28 +558,28 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   NSString *channel = @"";
   BOOL isProduction = true;
   BOOL isOpenMessageRoaming = false;
-  
+
   if (param[@"appkey"]) {
     appkey = param[@"appkey"];
     self.JMessageAppKey = appkey;
   }
-  
+
   if (param[@"channel"]) {
     channel = param[@"channel"];
   }
-  
+
   if (param[@"isOpenMessageRoaming"]) {
     NSNumber *isOpenMessageRoamingNum = param[@"isOpenMessageRoaming"];
     isOpenMessageRoaming = [isOpenMessageRoamingNum boolValue];
   }
-  
+
   if (param[@"isProduction"]) {
     NSNumber *isProductionNum = param[@"isProduction"];
     isProduction = [isProductionNum boolValue];
   }
-  
+
   [JMessage addDelegate:self withConversation:nil];
-  
+
   [JMessage setupJMessage:self.launchOptions
                    appKey:appkey
                   channel:channel
@@ -586,7 +621,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)setBadge:(FlutterMethodCall*)call result:(FlutterResult)result {
     NSDictionary *param = call.arguments;
     NSNumber *badge = param[@"badge"];
-    
+
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:badge.integerValue];
     [JMessage setBadge:badge.integerValue > 0 ? badge.integerValue: 0];
     result(nil);
@@ -598,21 +633,21 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 - (void)userRegister:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
-  
+
   JMSGUserInfo *info = [[JMSGUserInfo alloc] init];
   if (param[@"nickname"]) {
     info.nickname = param[@"nickname"];
   }
-  
+
   if (param[@"birthday"]) {
     NSNumber *birthday = param[@"birthday"];
     info.birthday = @([birthday integerValue] / 1000); // Convert millisecond to second.
   }
-  
+
   if (param[@"signature"]) {
     info.signature = param[@"signature"];
   }
-  
+
   if (param[@"gender"]) {
     if ([param[@"gender"] isEqualToString:@"male"]) {
       info.gender = kJMSGUserGenderMale;
@@ -622,19 +657,19 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       info.gender = kJMSGUserGenderUnknown;
     }
   }
-  
+
   if (param[@"region"]) {
     info.region = param[@"region"];
   }
-  
+
   if (param[@"address"]) {
     info.address = param[@"address"];
   }
-  
+
   if (param[@"extras"] && [param[@"extras"] isKindOfClass: [NSDictionary class]]) {
     info.extras = param[@"extras"];
   }
-  
+
   [JMSGUser registerWithUsername:param[@"username"]
                         password:param[@"password"]
                         userInfo:info
@@ -643,22 +678,22 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
                    result([error flutterError]);
                    return;
                  }
-                 
+
                  result(nil);
                }];
-  
+
 }
 
 
 - (void)login:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *user = call.arguments;
-  
+
   [JMSGUser loginWithUsername:user[@"username"] password:user[@"password"] completionHandler:^(id resultObject, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     JMSGUser *myInfo = [JMSGUser myInfo];
     // 为了和 Android 行为一致，在登录的时候自动下载缩略图。
     [myInfo thumbAvatarData:^(NSData *data, NSString *objectId, NSError *error) {
@@ -700,7 +735,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   } else {
     appKey = self.JMessageAppKey;
   }
-  
+
   [JMSGUser userInfoArrayWithUsernameArray:@[param[@"username"]] appKey:appKey completionHandler:^(id resultObject, NSError *error) {
     if (error) {
       result([error flutterError]);
@@ -726,16 +761,16 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)updateMyAvatar:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
   NSString *mediaPath = param[@"imgPath"];
-  
+
   if(![[NSFileManager defaultManager] fileExistsAtPath: mediaPath]){
     NSError *error = [NSError errorWithDomain:@"media file not exit!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   mediaPath = mediaPath;
   NSData *img = [NSData dataWithContentsOfFile: mediaPath];
-  
+
   [JMSGUser updateMyInfoWithParameter:img userFieldType:kJMSGUserFieldsAvatar completionHandler:^(id resultObject, NSError *error) {
     if (error) {
       result([error flutterError]);
@@ -747,22 +782,22 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 - (void)updateMyInfo:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
-  
+
   JMSGUserInfo *info = [[JMSGUserInfo alloc] init];
-  
+
   if (param[@"nickname"]) {
     info.nickname = param[@"nickname"];
   }
-  
+
   if (param[@"birthday"]) {
     NSNumber *birthday = param[@"birthday"];
     info.birthday = @([birthday integerValue] / 1000); // Millisecond to second.
   }
-  
+
   if (param[@"signature"]) {
     info.signature = param[@"signature"];
   }
-  
+
   if (param[@"gender"]) {
     if ([param[@"gender"] isEqualToString:@"male"]) {
       info.gender = kJMSGUserGenderMale;
@@ -772,19 +807,19 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       info.gender = kJMSGUserGenderUnknown;
     }
   }
-  
+
   if (param[@"region"]) {
     info.region = param[@"region"];
   }
-  
+
   if (param[@"address"]) {
     info.address = param[@"address"];
   }
-  
+
   if (param[@"extras"]) {
     info.extras = param[@"extras"];
   }
-  
+
   [JMSGUser updateMyInfoWithUserInfo:info completionHandler:^(id resultObject, NSError *error) {
     if (error) {
       result([error flutterError]);
@@ -798,16 +833,16 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 - (void)updateGroupAvatar:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
   NSString *mediaPath = param[@"imgPath"];
-  
+
   if(![[NSFileManager defaultManager] fileExistsAtPath: mediaPath]){
     NSError *error = [NSError errorWithDomain:@"media file not exit!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   mediaPath = mediaPath;
   NSData *img = [NSData dataWithContentsOfFile: mediaPath];
-  
+
   [JMSGGroup updateGroupAvatarWithGroupId:param[@"id"] avatarData:img avatarFormat:[mediaPath pathExtension] completionHandler:^(id resultObject, NSError *error) {
     if (error) {
       result([error flutterError]);
@@ -826,7 +861,7 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return ;
     }
-    
+
     JMSGGroup *group = resultObject;
     [group thumbAvatarData:^(NSData *data, NSString *objectId, NSError *error) {
       if (error) {
@@ -846,14 +881,14 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return ;
     }
-    
+
     JMSGGroup *group = resultObject;
     [group largeAvatarData:^(NSData *data, NSString *objectId, NSError *error) {
       if (error) {
         result([error flutterError]);
         return ;
       }
-      
+
       result(@{@"id": objectId, @"filePath": group.largeAvatarLocalPath ? : @""});
     }];
   }];
@@ -868,34 +903,34 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   } else {
     appKey = self.JMessageAppKey;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
-    
+
       if (error) {
         result([error flutterError]);
         return ;
       }
-      
+
       NSDictionary *extras = param[@"extras"];
       for (NSString *key in extras) {
         [conversation setExtraValue:extras[key] forKey:key];
       }
       result([conversation conversationToDictionary]);
       return;
-    
+
   }];
 }
 
 - (void)createMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
-  
+
   JMSGOptionalContent *messageSendingOptions = nil;
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGContentType type = [self convertStringToContentType: param[@"messageType"]];
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type: type];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
@@ -909,14 +944,14 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 - (void)sendDraftMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
 
       result([error flutterError]);
       return;
     }
-    
+
     JMSGMessage *message = nil;
     if (self.draftMessageCache[param[@"id"]]) {
       message = self.draftMessageCache[param[@"id"]];
@@ -926,33 +961,33 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result([error flutterError]);
       return;
     }
-    
+
 //    if (!message) {
 //      NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
 //      result([error flutterError]);
 //      return;
 //    }
-    
+
     if ([message.content isKindOfClass:[JMSGMediaAbstractContent class]]) {
       JMSGMediaAbstractContent *content = (JMSGMediaAbstractContent *)message.content;
       content.uploadHandler = ^(float percent, NSString *msgID) {
       };
     }
-    
+
     JMSGOptionalContent *messageSendingOptions = nil;
     if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
       messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
-    
+
     if (param[@"extras"] && [param[@"extras"] isKindOfClass: [NSDictionary class]]) {
       NSDictionary *extras = param[@"extras"];
       for (NSString *key in extras.allKeys) {
         [message.content addStringExtra:extras[key] forKey:key];
       }
     }
-    
+
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
     } else {
@@ -964,25 +999,25 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
 
 - (void)sendTextMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
-  
+
   JMSGOptionalContent *messageSendingOptions = nil;
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeText];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return ;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -999,20 +1034,20 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeImage];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -1029,20 +1064,20 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeVoice];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -1059,20 +1094,20 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeCustom];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -1089,20 +1124,20 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeLocation];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -1119,20 +1154,20 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
     messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
   }
-  
+
   JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeFile];
   if (!message) {
     NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
     result([error flutterError]);
     return;
   }
-  
+
   [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
     if (error) {
       result([error flutterError]);
       return;
     }
-    
+
     self.SendMsgCallbackDic[message.msgId] = result;
     if (messageSendingOptions) {
       [conversation sendMessage:message optionalContent:messageSendingOptions];
@@ -1140,6 +1175,35 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       [conversation sendMessage:message];
     }
   }];
+}
+
+- (void)sendVideoMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
+    NSDictionary *param = call.arguments;
+    JMSGOptionalContent *messageSendingOptions = nil;
+    if (param[@"messageSendingOptions"] && [param[@"messageSendingOptions"] isKindOfClass: [NSDictionary class]]) {
+      messageSendingOptions = [self convertDicToJMSGOptionalContent:param[@"messageSendingOptions"]];
+    }
+
+    JMSGMessage *message = [self createMessageWithDictionary:param type:kJMSGContentTypeVideo];
+    if (!message) {
+      NSError *error = [NSError errorWithDomain:@"cannot create message, check your params!" code: 1 userInfo: nil];
+      result([error flutterError]);
+      return;
+    }
+
+    [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+      if (error) {
+        result([error flutterError]);
+        return;
+      }
+
+      self.SendMsgCallbackDic[message.msgId] = result;
+      if (messageSendingOptions) {
+        [conversation sendMessage:message optionalContent:messageSendingOptions];
+      } else {
+        [conversation sendMessage:message];
+      }
+    }];
 }
 
 - (void)retractMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
