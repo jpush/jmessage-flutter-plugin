@@ -1,3 +1,11 @@
+## 2.1.4
++新增：新增发送视频接口 sendVideoMessage
+## 2.1.2
++升级：升级 android jcore 2.8.2
+## 2.1.0
++适配：适配 null safety
+## 2.0.5
++ 升级：Android jcore sdk 升级到 2.7.8
 ## 2.0.3
 + 升级：Android msg sdk 升级到 2.1.4
 ## 2.0.1

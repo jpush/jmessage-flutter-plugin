@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,8 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jmessage_flutter/jmessage_flutter.dart';
 import 'package:jmessage_flutter_example/conversation_manage_view.dart';
 import 'package:jmessage_flutter_example/group_manage_view.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:platform/platform.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 const String kMockAppkey = "e58a32cb3e4469ebf31867e5"; //'你自己应用的 AppKey';
 const String kMockUserName = '0001';
@@ -71,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void demoShowMessage(bool isShow, String msg) {
     setState(() {
       _loading = isShow;
-      _result = msg ?? "";
+      _result = msg;
     });
   }
 
@@ -160,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _loading = true;
     });
-    JMUserInfo u = await jmessage.getMyInfo();
+    JMUserInfo? u = await jmessage.getMyInfo();
 
     setState(() {
       _loading = false;
@@ -219,12 +222,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     String username = usernameTextEC2.text;
 
-    PickedFile selectImageFile =
+    PickedFile? selectImageFile =
         await ImagePicker().getImage(source: ImageSource.gallery);
 
     JMSingle type = JMSingle.fromJson({"username": username});
-    JMImageMessage msg =
-        await jmessage.sendImageMessage(type: type, path: selectImageFile.path);
+    JMImageMessage msg = await jmessage.sendImageMessage(
+        type: type, path: selectImageFile?.path);
 
     setState(() {
       _loading = false;
@@ -258,6 +261,48 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _loading = false;
       _result = "【地理位置消息】${msg.toJson()}";
+    });
+  }
+
+  void demoSendVideoMessage() async {
+    print(flutter_log + "demoSendVideoMessage " + usernameTextEC2.text);
+
+    setState(() {
+      _loading = true;
+    });
+
+    if (usernameTextEC2.text == "") {
+      setState(() {
+        _loading = false;
+        _result = "【发消息】对方 username 不能为空";
+      });
+      return;
+    }
+    String username = usernameTextEC2.text;
+
+    PickedFile? selectVideoPath = await ImagePicker().getVideo(
+        source: ImageSource.gallery, maxDuration: const Duration(seconds: 10));
+
+    String? thumbnailPath = await VideoThumbnail.thumbnailFile(
+      video: selectVideoPath!.path,
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 128,
+      // specify the width of the thumbnail, let the height auto-scaled to keep the source aspect ratio
+      quality: 25,
+    );
+
+    // print('selectVideoPath ======${selectVideoPath.path},thumbnailPath = $thumbnailPath');
+    JMSingle type = JMSingle.fromJson({"username": username});
+    JMVideoMessage msg = await jmessage.sendVideoMessage(
+        type: type,
+        duration: null,
+        thumbFormat: "",
+        videoFileName: "",
+        thumbImagePath: thumbnailPath,
+        videoPath: selectVideoPath.path);
+    setState(() {
+      _loading = false;
+      _result = "【视频消息】${msg.toJson()}";
     });
   }
 
@@ -394,7 +439,7 @@ class _MyHomePageState extends State<MyHomePage> {
           reason: 'addReceiveGroupAdminApprovalListener.isAgree is null');
 
       verifyUser(event.groupAdmin);
-      for (var user in event.users) {
+      for (var user in event.users!) {
         verifyUser(user);
       }
       print('listener receive event - group admin approval');
@@ -569,11 +614,11 @@ class _MyHomePageState extends State<MyHomePage> {
             gender: _gender,
             extras: _extras);
 
-        final JMUserInfo user = await jmessage.getMyInfo();
+        final JMUserInfo? user = await jmessage.getMyInfo();
         // expect(user.extras, _extras);
-        expect(user.gender, _gender);
+        expect(user?.gender, _gender);
         print('test    updateMyInfo success');
-        print(user.toJson());
+        print(user?.toJson());
       });
 
       test('createGroup', () async {
@@ -951,7 +996,7 @@ class _MyHomePageState extends State<MyHomePage> {
             await jmessage.getGroupMembers(id: kMockGroupId);
         groups.map((groupMember) {
           verifyGroupMember(groupMember);
-          if (groupMember.user.username == '0002') {
+          if (groupMember.user?.username == '0002') {
             expect(groupMember.groupNickname, kMockgroupNickName);
           }
         });
@@ -995,7 +1040,7 @@ class _MyHomePageState extends State<MyHomePage> {
             await jmessage.getGroupMembers(id: kMockGroupId);
         groups.map((groupMember) {
           verifyGroupMember(groupMember);
-          if (groupMember.user.username == '0002') {
+          if (groupMember.user?.username == '0002') {
             expect(groupMember.memberType, JMGroupMemberType.admin);
           }
         });
@@ -1008,7 +1053,7 @@ class _MyHomePageState extends State<MyHomePage> {
         groups = await jmessage.getGroupMembers(id: kMockGroupId);
         groups.map((groupMember) {
           verifyGroupMember(groupMember);
-          if (groupMember.user.username == '0002') {
+          if (groupMember.user?.username == '0002') {
             expect(groupMember.memberType, JMGroupMemberType.ordinary);
           }
         });
@@ -1126,9 +1171,12 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 new Text(" "),
                 new CustomButton(
+                    title: "发送视频消息", onPressed: demoSendVideoMessage),
+                new Text(" "),
+                new CustomButton(
                     title: "会话管理界面",
                     onPressed: () {
-                      jmessage.getMyInfo().then((JMUserInfo userInfo) {
+                      jmessage.getMyInfo().then((JMUserInfo? userInfo) {
                         if (userInfo != null) {
                           Navigator.push(
                               context,
@@ -1146,7 +1194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 new CustomButton(
                   title: "群组管理界面",
                   onPressed: () {
-                    jmessage.getMyInfo().then((JMUserInfo userInfo) {
+                    jmessage.getMyInfo().then((JMUserInfo? userInfo) {
                       if (userInfo != null) {
                         Navigator.push(
                             context,
@@ -1192,22 +1240,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-void verifyUser(JMUserInfo user) {
+void verifyUser(JMUserInfo? user) {
   expect(user, isNotNull, reason: 'user');
-  expect(user.username, isNotNull, reason: 'user.username');
-  expect(user.appKey, isNotNull, reason: 'user.appkey');
-  expect(user.nickname, isNotNull, reason: 'user.nickname');
-  expect(user.avatarThumbPath, isNotNull, reason: 'user.avatarThumbPath');
-  expect(user.birthday, isNotNull, reason: 'user.birthday');
-  expect(user.region, isNotNull, reason: 'user.region');
-  expect(user.signature, isNotNull, reason: 'user.signature');
-  expect(user.address, isNotNull, reason: 'user.address');
-  expect(user.noteName, isNotNull, reason: 'user.noteName');
-  expect(user.noteText, isNotNull, reason: 'user.noteText');
-  expect(user.isNoDisturb, isNotNull, reason: 'user.isNoDisturb');
-  expect(user.isInBlackList, isNotNull, reason: 'user.isInBlackList');
-  expect(user.isFriend, isNotNull, reason: 'user.isFriend');
-  expect(user.extras, isNotNull, reason: 'user.extras');
+  expect(user?.username, isNotNull, reason: 'user.username');
+  expect(user?.appKey, isNotNull, reason: 'user.appkey');
+  expect(user?.nickname, isNotNull, reason: 'user.nickname');
+  expect(user?.avatarThumbPath, isNotNull, reason: 'user.avatarThumbPath');
+  expect(user?.birthday, isNotNull, reason: 'user.birthday');
+  expect(user?.region, isNotNull, reason: 'user.region');
+  expect(user?.signature, isNotNull, reason: 'user.signature');
+  expect(user?.address, isNotNull, reason: 'user.address');
+  expect(user?.noteName, isNotNull, reason: 'user.noteName');
+  expect(user?.noteText, isNotNull, reason: 'user.noteText');
+  expect(user?.isNoDisturb, isNotNull, reason: 'user.isNoDisturb');
+  expect(user?.isInBlackList, isNotNull, reason: 'user.isInBlackList');
+  expect(user?.isFriend, isNotNull, reason: 'user.isFriend');
+  expect(user?.extras, isNotNull, reason: 'user.extras');
 }
 
 void verifyGroupInfo(JMGroupInfo group) {
@@ -1263,8 +1311,8 @@ void verifyMessage(dynamic msg) {
 
 /// 封装控件
 class CustomButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String title;
+  final VoidCallback? onPressed;
+  final String? title;
 
   const CustomButton({@required this.onPressed, @required this.title});
 
@@ -1284,8 +1332,8 @@ class CustomButton extends StatelessWidget {
 }
 
 class CustomTextField extends StatelessWidget {
-  final String hintText;
-  final TextEditingController controller;
+  final String? hintText;
+  final TextEditingController? controller;
 
   const CustomTextField({@required this.hintText, @required this.controller});
 

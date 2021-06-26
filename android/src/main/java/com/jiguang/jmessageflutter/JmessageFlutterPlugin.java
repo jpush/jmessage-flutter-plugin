@@ -3,6 +3,7 @@ package com.jiguang.jmessageflutter;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.text.TextUtils;
@@ -42,6 +43,7 @@ import cn.jpush.im.android.api.content.ImageContent;
 import cn.jpush.im.android.api.content.LocationContent;
 import cn.jpush.im.android.api.content.MessageContent;
 import cn.jpush.im.android.api.content.TextContent;
+import cn.jpush.im.android.api.content.VideoContent;
 import cn.jpush.im.android.api.content.VoiceContent;
 import cn.jpush.im.android.api.enums.ContentType;
 import cn.jpush.im.android.api.enums.PlatformType;
@@ -308,6 +310,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             getMessageReceiptDetails(call, result);
         } else if (call.method.equals("setMessageHaveRead")) {
             setMessageHaveRead(call, result);
+        } else if (call.method.equals("sendVideoMessage")) {
+            sendVideoMessage(call, result);
         } else {
             result.notImplemented();
         }
@@ -1043,6 +1047,79 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             e.printStackTrace();
             handleResult(ERR_CODE_FILE, "File size is too large", result);
         }
+    }
+
+    private void sendVideoMessage(MethodCall call, Result result) {
+        HashMap<String, Object> map = call.arguments();
+
+        int duration;
+        String thumbImagePath = "", thumbFormat = "", videoPath, videoFileName = "";
+        Map<String, String> extras = null;
+        MessageSendingOptions options = null;
+        Conversation conversation;
+
+        try {
+            JSONObject params = new JSONObject(map);
+
+            conversation = JMessageUtils.createConversation(params);
+            if (conversation == null) {
+                handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+                return;
+            }
+
+            videoPath = params.getString("videoPath");
+
+            if (params.has("thumbFormat")) {
+                thumbFormat = params.getString("thumbFormat");
+            }
+
+            if (params.has("thumbImagePath")) {
+                thumbImagePath = params.getString("thumbImagePath");
+            }
+
+            if (params.has("duration")) {
+                duration = params.getInt("duration");
+            } else {
+                MediaPlayer mediaPlayer = MediaPlayer.create(mContext, Uri.parse(videoPath));
+                duration = mediaPlayer.getDuration() / 1000;
+                mediaPlayer.release();
+            }
+
+            if (params.has("videoFileName")) {
+                videoFileName = params.getString("videoFileName");
+            }
+
+            if (params.has("extras")) {
+                extras = fromJson(params.getJSONObject("extras"));
+            }
+
+            if (params.has("messageSendingOptions")) {
+                options = toMessageSendingOptions(params.getJSONObject("messageSendingOptions"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+            return;
+        }
+        try {
+            File videoFile = getFile(videoPath);
+
+            Bitmap bitmap = null;
+            if (!TextUtils.isEmpty(thumbImagePath)) {
+                bitmap = BitmapFactory.decodeFile(thumbImagePath);
+            }
+
+            VideoContent content = new VideoContent(bitmap, thumbFormat, videoFile, videoFileName, duration);
+            if (extras != null) {
+                content.setExtras(extras);
+            }
+
+            sendMessage(conversation, content, options, result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            handleResult(ERR_CODE_FILE, ERR_MSG_FILE, result);
+        }
+
     }
 
     private void sendLocationMessage(MethodCall call, Result result) {
