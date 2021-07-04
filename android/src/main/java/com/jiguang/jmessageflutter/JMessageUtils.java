@@ -2,6 +2,7 @@ package com.jiguang.jmessageflutter;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
+import android.util.Log;
 
 //import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
@@ -128,18 +129,17 @@ class JMessageUtils {
         String type = params.getString("type");
         Conversation conversation = null;
 
-        if (type.equals("single")) {
-            String username = params.getString("username");
-            String appKey = params.has("appKey") ? params.getString("appKey") : "";
-            conversation = JMessageClient.getSingleConversation(username, appKey);
-
-        } else if (type.equals("group")) {
+        if (type.equals("group")) {
             String groupId = params.getString("groupId");
             conversation = JMessageClient.getGroupConversation(Long.parseLong(groupId));
 
         } else if (type.equals("chatRoom")) {
             long roomId = Long.parseLong(params.getString("roomId"));
             conversation = JMessageClient.getChatRoomConversation(roomId);
+        } else {//if (type.equals("single")) || "user"
+            String username = params.getString("username");
+            String appKey = params.has("appKey") ? params.getString("appKey") : "";
+            conversation = JMessageClient.getSingleConversation(username, appKey);
         }
 
         return conversation;

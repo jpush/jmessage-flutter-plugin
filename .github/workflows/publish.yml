@@ -1,0 +1,24 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Publish Dart/Flutter package
+        uses: sakebook/actions-flutter-pub-publisher@v1.3.1
+        with:
+          credential: ${{ secrets.JMESSAGE_CREDENTIAL_JSON }}
+          flutter_package: false
+          skip_test: true
+          dry_run: false
+
+
