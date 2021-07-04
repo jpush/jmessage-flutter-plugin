@@ -444,7 +444,7 @@ class JmessageFlutter {
     }
     print("Action - login: username=$username,pw=$password");
 
-    Map userJson = await _channel
+    Map? userJson = await _channel
         .invokeMethod('login', {'username': username, 'password': password});
     if (userJson == null) {
       return null;
@@ -1977,7 +1977,7 @@ class JMUserInfo {
 
   Map toJson() {
     return {
-      'type': getStringFromEnum(type),
+      'type': getStringFromEnum(userType),
       'gender': getStringFromEnum(gender),
       'username': username,
       'appKey': appKey,
