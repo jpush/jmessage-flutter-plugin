@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,9 +33,9 @@ final JMChatRoom kMockChatRoom =
 
 MethodChannel channel = MethodChannel('jmessage_flutter');
 JmessageFlutter jmessage =
-    new JmessageFlutter.private(channel, const LocalPlatform());
+    JmessageFlutter.private(channel, const LocalPlatform());
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -56,18 +54,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final String flutter_log = "| Example | Flutter | ";
+  final String flutterLog = "| Example | Flutter | ";
 
   @override
   void initState() {
     super.initState();
-    print(flutter_log + "demo manin init state");
+    print(flutterLog + "demo manin init state");
     // initPlatformState();
 
     jmessage..setDebugMode(enable: true);
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
     jmessage.applyPushAuthority(
-        new JMNotificationSettingsIOS(sound: true, alert: true, badge: true));
+        JMNotificationSettingsIOS(sound: true, alert: true, badge: true));
     addListener();
   }
 
@@ -79,13 +77,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoRegisterAction() async {
-    print(flutter_log + "registerAction : " + usernameTextEC1.text);
+    print(flutterLog + "registerAction : " + usernameTextEC1.text);
 
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
-    if (usernameTextEC1.text == null || usernameTextEC1.text == "") {
+    if (usernameTextEC1.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【注册】username 不能为空";
@@ -103,13 +99,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoLoginUserAction() async {
-    print(flutter_log + "loginUserAction : " + usernameTextEC1.text);
+    print(flutterLog + "loginUserAction : " + usernameTextEC1.text);
 
     setState(() {
       _loading = true;
     });
 
-    if (usernameTextEC1.text == null || usernameTextEC1.text == "") {
+    if (usernameTextEC1.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【登录】username 不能为空";
@@ -142,23 +138,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoLogoutAction() async {
-    print(flutter_log + "demoLogoutAction : ");
+    print(flutterLog + "demoLogoutAction : ");
 
     setState(() {
       _loading = true;
     });
 
     await jmessage.logout().then((onValue) {
-      print(flutter_log + "demoLogoutAction : then");
+      print(flutterLog + "demoLogoutAction : then");
       demoShowMessage(false, "【已退出】");
     }, onError: (onError) {
-      print(flutter_log + "demoLogoutAction : onError $onError");
+      print(flutterLog + "demoLogoutAction : onError $onError");
       demoShowMessage(false, onError.toString());
     });
   }
 
   void demoGetCurrentUserInfo() async {
-    print(flutter_log + "demoGetCurrentUserInfo : ");
+    print(flutterLog + "demoGetCurrentUserInfo : ");
 
     setState(() {
       _loading = true;
@@ -176,13 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoSendTextMessage() async {
-    print(flutter_log + "demoSendTextMessage " + usernameTextEC2.text);
+    print(flutterLog + "demoSendTextMessage " + usernameTextEC2.text);
 
     setState(() {
       _loading = true;
     });
 
-    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
+    if (usernameTextEC2.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【发消息】对方 username 不能为空";
@@ -203,17 +199,15 @@ class _MyHomePageState extends State<MyHomePage> {
       _loading = false;
       String messageString = "【文本消息】${msg.toJson()}";
       _result = messageString;
-      print(flutter_log + messageString);
+      print(flutterLog + messageString);
     });
   }
 
   void demoSendImageMessage() async {
-    print(flutter_log + "demoSendImageMessage " + usernameTextEC2.text);
+    print(flutterLog + "demoSendImageMessage " + usernameTextEC2.text);
 
-    setState(() {
-      _loading = true;
-    });
-    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
+    setState(() => _loading = true);
+    if (usernameTextEC2.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【发消息】对方 username 不能为空";
@@ -236,13 +230,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoSendLocationMessage() async {
-    print(flutter_log + "demoSendLocationMessage " + usernameTextEC2.text);
+    print(flutterLog + "demoSendLocationMessage " + usernameTextEC2.text);
 
-    setState(() {
-      _loading = true;
-    });
-
-    if (usernameTextEC2.text == null || usernameTextEC2.text == "") {
+    setState(() => _loading = true);
+    if (usernameTextEC2.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【发消息】对方 username 不能为空";
@@ -265,7 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void demoSendVideoMessage() async {
-    print(flutter_log + "demoSendVideoMessage " + usernameTextEC2.text);
+    print(flutterLog + "demoSendVideoMessage " + usernameTextEC2.text);
 
     setState(() {
       _loading = true;
@@ -306,9 +297,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  static final String chatRoomMsgListenerID =
-      "chatRoomMsgListenerID"; //监听聊天室消息的监听id
-  static final String receiveMsgListenerID = "receiveMsgListenerID"; //监听消息的监听id
+  //监听聊天室消息的监听id
+  static const String chatRoomMsgListenerID = "chatRoomMsgListenerID";
+
+  //监听消息的监听id
+  static const String receiveMsgListenerID = "receiveMsgListenerID";
 
   void removeListener() async {
     jmessage.removeReceiveChatRoomMessageListener(chatRoomMsgListenerID);
@@ -365,7 +358,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     jmessage.addLoginStateChangedListener((JMLoginStateChangedType type) {
-      print('listener receive event -  login state change: ${type}');
+      print('listener receive event -  login state change: $type');
     });
 
     jmessage.addContactNotifyListener((JMContactNotifyEvent event) {
@@ -610,7 +603,7 @@ class _MyHomePageState extends State<MyHomePage> {
         JMGender _gender = JMGender.male;
         Map _extras = {'aa': 'aaa', 'key1': 'value1'};
         await jmessage.updateMyInfo(
-            birthday: new DateTime.now().millisecondsSinceEpoch,
+            birthday: DateTime.now().millisecondsSinceEpoch,
             gender: _gender,
             extras: _extras);
 
@@ -761,15 +754,14 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       test('updateGroupInfo', () async {
-        const String kMockNewName = 'the new name';
-        const String kMockNewDesc = 'the new desc';
+        const String kMockName = 'the  name';
+        const String kMockDesc = 'the  desc';
         await jmessage.updateGroupInfo(
-            id: kMockGroupId, newName: kMockNewName, newDesc: kMockNewDesc);
+            id: kMockGroupId, newName: kMockName, newDesc: kMockDesc);
 
         JMGroupInfo group = await jmessage.getGroupInfo(id: kMockGroupId);
-        expect(group.name, kMockNewName,
-            reason: 'the group name udpate failed');
-        expect(group.desc, kMockNewDesc, reason: 'the group name desc failed');
+        expect(group.name, kMockName, reason: 'the group name udpate failed');
+        expect(group.desc, kMockDesc, reason: 'the group name desc failed');
         print('test   updateGroupInfo done');
       });
 
@@ -986,7 +978,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       test('setGroupNickname', () async {
-        const String kMockgroupNickName = 'newGroupMemberNickName';
+        const String kMockgroupNickName = 'GroupMemberNickName';
         await jmessage.setGroupNickname(
             groupId: kMockGroupId,
             username: '0002',
@@ -1109,80 +1101,76 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildContext() {
-    return new GestureDetector(
+    return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: new Container(
+      child: Container(
         color: Colors.grey,
         height: double.infinity,
-        child: new Column(
+        child: Column(
           children: <Widget>[
-            new Container(
+            Container(
               margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
               height: 35,
               color: Colors.brown,
-              child: new CustomTextField(
+              child: CustomTextField(
                   hintText: "请输入登录的 username", controller: usernameTextEC1),
             ),
-            new Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                new Text(" "),
-                new CustomButton(title: "注册", onPressed: demoRegisterAction),
-                new Text(" "),
-                new CustomButton(title: "登录", onPressed: demoLoginUserAction),
+                Text(" "),
+                CustomButton(title: "注册", onPressed: demoRegisterAction),
+                Text(" "),
+                CustomButton(title: "登录", onPressed: demoLoginUserAction),
               ],
             ),
-            new Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                new Text(" "),
-                new CustomButton(
-                    title: "用户信息", onPressed: demoGetCurrentUserInfo),
-                new Text(" "),
-                new CustomButton(title: "退出", onPressed: demoLogoutAction),
+                Text(" "),
+                CustomButton(title: "用户信息", onPressed: demoGetCurrentUserInfo),
+                Text(" "),
+                CustomButton(title: "退出", onPressed: demoLogoutAction),
               ],
             ),
-            new Container(
+            Container(
               margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
               height: 35,
               color: Colors.brown,
-              child: new CustomTextField(
+              child: CustomTextField(
                   hintText: "请输入username", controller: usernameTextEC2),
             ),
-            new Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                new Text(" "),
-                new CustomButton(
-                    title: "发送文本消息", onPressed: demoSendTextMessage),
-                new Text(" "),
-                new CustomButton(
-                    title: "发送图片消息", onPressed: demoSendImageMessage),
-                new Text(" "),
-                new CustomButton(
+                Text(" "),
+                CustomButton(title: "发送文本消息", onPressed: demoSendTextMessage),
+                Text(" "),
+                CustomButton(title: "发送图片消息", onPressed: demoSendImageMessage),
+                Text(" "),
+                CustomButton(
                     title: "发送位置消息", onPressed: demoSendLocationMessage),
               ],
             ),
-            new Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                new Text(" "),
-                new CustomButton(
-                    title: "发送视频消息", onPressed: demoSendVideoMessage),
-                new Text(" "),
-                new CustomButton(
+                Text(" "),
+                CustomButton(title: "发送视频消息", onPressed: demoSendVideoMessage),
+                Text(" "),
+                CustomButton(
                     title: "会话管理界面",
                     onPressed: () {
                       jmessage.getMyInfo().then((JMUserInfo? userInfo) {
                         if (userInfo != null) {
                           Navigator.push(
                               context,
-                              new MaterialPageRoute(
+                              MaterialPageRoute(
                                   builder: (context) =>
-                                      new ConversationManageView()));
+                                      ConversationManageView()));
                         } else {
                           setState(() {
                             _result = " 请先登录 ";
@@ -1190,16 +1178,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         }
                       });
                     }),
-                new Text(" "),
-                new CustomButton(
+                Text(" "),
+                CustomButton(
                   title: "群组管理界面",
                   onPressed: () {
                     jmessage.getMyInfo().then((JMUserInfo? userInfo) {
                       if (userInfo != null) {
                         Navigator.push(
                             context,
-                            new MaterialPageRoute(
-                                builder: (context) => new GroupManageView()));
+                            MaterialPageRoute(
+                                builder: (context) => GroupManageView()));
                       } else {
                         setState(() {
                           _result = " 请先登录 ";
@@ -1210,7 +1198,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-            new Container(
+            Container(
               margin: EdgeInsets.fromLTRB(5, 5, 5, 20),
               color: Colors.brown,
               child: Text(_result),
@@ -1226,13 +1214,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool _loading = false;
   String _result = "展示信息栏";
-  var usernameTextEC1 = new TextEditingController();
-  var usernameTextEC2 = new TextEditingController();
+  var usernameTextEC1 = TextEditingController();
+  var usernameTextEC2 = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('JMessage Plugin App'),
       ),
       body: ModalProgressHUD(child: _buildContext(), inAsyncCall: _loading),
@@ -1318,9 +1306,9 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new TextButton(
+    return TextButton(
       onPressed: onPressed,
-      child: new Text("$title"),
+      child: Text("$title"),
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.all(Colors.white),
         overlayColor: MaterialStateProperty.all(Color(0xff888888)),
@@ -1340,11 +1328,11 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new Container(
+    return Container(
       margin: EdgeInsets.fromLTRB(5, 10, 5, 0),
       height: 35,
       color: Colors.brown,
-      child: new TextField(
+      child: TextField(
         autofocus: false,
         style: TextStyle(color: Colors.black),
         decoration: InputDecoration(

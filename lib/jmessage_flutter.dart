@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:platform/platform.dart';
@@ -194,7 +195,7 @@ class JmessageFlutter {
   }
 
   addReceiveChatRoomMessageListener(
-      String listenerID, JMReceiveChatRoomMessageListener callback) {
+      String? listenerID, JMReceiveChatRoomMessageListener callback) {
     if (listenerID == null) {
       print(flutterLog + "'listenerID' is can not be null.");
       return;
@@ -202,7 +203,7 @@ class JmessageFlutter {
     _eventHanders.receiveChatRoomMessageMap[listenerID] = callback;
   }
 
-  removeReceiveChatRoomMessageListener(String listenerID) {
+  removeReceiveChatRoomMessageListener(String? listenerID) {
     if (listenerID != null) {
       _eventHanders.receiveChatRoomMessageMap.remove(listenerID);
     }
@@ -377,8 +378,8 @@ class JmessageFlutter {
   }
 
   void init({
-    @required bool? isOpenMessageRoaming,
-    @required String? appkey,
+    required bool? isOpenMessageRoaming,
+    required String? appkey,
     String? channel,
     bool isProduction = false,
   }) {
@@ -416,14 +417,14 @@ class JmessageFlutter {
   ///
   /// @param {Int} badge
   ///
-  Future<void> setBadge({@required int? badge}) async {
+  Future<void> setBadge({required int? badge}) async {
     await _channel.invokeMethod('setBadge', {'badge': badge});
     return;
   }
 
   Future<void> userRegister(
-      {@required String? username,
-      @required String? password,
+      {required String? username,
+      required String? password,
       String? nickname}) async {
     print("Action - userRegister: username=$username,pw=$password");
     await _channel.invokeMethod('userRegister',
@@ -435,15 +436,15 @@ class JmessageFlutter {
   * @return 用户信息，可能为 null
   * */
   Future<JMUserInfo?> login({
-    @required String? username,
-    @required String? password,
+    required String? username,
+    required String? password,
   }) async {
     if (username == null || password == null) {
       throw ("username or password was passed null");
     }
     print("Action - login: username=$username,pw=$password");
 
-    Map userJson = await _channel
+    Map? userJson = await _channel
         .invokeMethod('login', {'username': username, 'password': password});
     if (userJson == null) {
       return null;
@@ -466,7 +467,7 @@ class JmessageFlutter {
   }
 
   Future<JMUserInfo> getUserInfo(
-      {@required String? username, String? appKey}) async {
+      {required String? username, String? appKey}) async {
     Map userJson = await _channel.invokeMethod(
         'getUserInfo',
         {'username': username, 'appKey': appKey}
@@ -475,13 +476,13 @@ class JmessageFlutter {
   }
 
   Future<void> updateMyPassword(
-      {@required String? oldPwd, @required String? newPwd}) async {
+      {required String? oldPwd, required String? newPwd}) async {
     await _channel
         .invokeMethod('updateMyPassword', {'oldPwd': oldPwd, 'newPwd': newPwd});
     return;
   }
 
-  Future<void> updateMyAvatar({@required String? imgPath}) async {
+  Future<void> updateMyAvatar({required String? imgPath}) async {
     await _channel.invokeMethod('updateMyAvatar', {'imgPath': imgPath});
     return;
   }
@@ -509,7 +510,7 @@ class JmessageFlutter {
   }
 
   Future<void> updateGroupAvatar(
-      {@required String? id, @required String? imgPath}) async {
+      {required String? id, required String? imgPath}) async {
     await _channel.invokeMethod(
         'updateGroupAvatar',
         {
@@ -520,7 +521,7 @@ class JmessageFlutter {
   }
 
   Future<Map> downloadThumbGroupAvatar({
-    @required String? id,
+    required String? id,
   }) async {
     Map res = await _channel.invokeMethod(
         'downloadThumbGroupAvatar',
@@ -531,7 +532,7 @@ class JmessageFlutter {
   }
 
   Future<Map> downloadOriginalGroupAvatar({
-    @required String? id,
+    required String? id,
   }) async {
     Map res = await _channel.invokeMethod(
         'downloadOriginalGroupAvatar',
@@ -555,8 +556,8 @@ class JmessageFlutter {
   }
 
   Future<dynamic> createMessage({
-    @required JMMessageType? type, // 消息类型
-    @required dynamic targetType,
+    required JMMessageType? type, // 消息类型
+    required dynamic targetType,
 
     /// (JMSingle | JMGroup | JMChatRoom)
     String? text,
@@ -597,7 +598,7 @@ class JmessageFlutter {
   /// message 可能是 JMTextMessage | JMVoiceMessage | JMImageMessage | JMFileMessage | JMCustomMessage;
   /// NOTE: 不要传接收到的消息进去，只能传通过 createMessage 创建的消息。
   Future<dynamic> sendMessage(
-      {@required JMNormalMessage? message,
+      {required JMNormalMessage? message,
       JMMessageSendOptions? sendOption}) async {
     Map param = message?.target?.targetType.toJson();
 
@@ -618,10 +619,10 @@ class JmessageFlutter {
   }
 
   Future<JMTextMessage> sendTextMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? text,
+    required String? text,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -647,10 +648,10 @@ class JmessageFlutter {
   }
 
   Future<JMImageMessage> sendImageMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -677,10 +678,10 @@ class JmessageFlutter {
   }
 
   Future<JMVoiceMessage> sendVoiceMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -707,10 +708,10 @@ class JmessageFlutter {
   }
 
   Future<JMCustomMessage> sendCustomMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required Map<dynamic, dynamic>? customObject,
+    required Map<dynamic, dynamic>? customObject,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -737,12 +738,12 @@ class JmessageFlutter {
   }
 
   Future<JMLocationMessage> sendLocationMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required double? latitude,
-    @required double? longitude,
-    @required int? scale,
+    required double? latitude,
+    required double? longitude,
+    required int? scale,
     String? address,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
@@ -777,10 +778,10 @@ class JmessageFlutter {
   }
 
   Future<JMFileMessage> sendFileMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -806,12 +807,12 @@ class JmessageFlutter {
   }
 
   Future<JMVideoMessage> sendVideoMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
     String? thumbImagePath,
     String? thumbFormat,
-    @required String? videoPath,
+    required String? videoPath,
     String? videoFileName,
     int? duration,
     JMMessageSendOptions? sendOption,
@@ -846,18 +847,14 @@ class JmessageFlutter {
     return res;
   }
 
-  /**
-   * 消息撤回
-   *
-   * @param target    聊天对象， JMSingle | JMGroup
-   * @param serverMessageId 消息服务器 id
-   *
-   * */
+  /// 消息撤回 target
+  /// 聊天对象， JMSingle | JMGroup
+  /// serverMessageId 消息服务器 id
   Future<void> retractMessage({
-    @required dynamic target,
+    required dynamic target,
 
     /// (JMSingle | JMGroup )
-    @required String? serverMessageId,
+    required String? serverMessageId,
   }) async {
     Map param = target.toJson();
 
@@ -871,21 +868,17 @@ class JmessageFlutter {
     return;
   }
 
-  /**
-   * 批量获取本地历史消息
-   *
-   * @param target 聊天对象， JMSingle | JMGroup
-   * @param from  起始位置
-   * @param limit 获取数量
-   * @param isDescend 是否倒叙
-   *
-   * */
+  /// 批量获取本地历史消息
+  /// target 聊天对象， JMSingle | JMGroup
+  /// from  起始位置
+  /// limit 获取数量
+  /// isDescend 是否倒序
   Future<List> getHistoryMessages(
-      {@required dynamic type,
+      {required dynamic type,
 
       /// (JMSingle | JMGroup)
-      @required int? from,
-      @required int? limit,
+      required int? from,
+      required int? limit,
       bool isDescend = false}) async {
     Map param = type.toJson();
 
@@ -908,13 +901,13 @@ class JmessageFlutter {
   }
 
   /// 获取本地单条消息
-  /// @param target    聊天对象， JMSingle | JMGroup
-  ///  @param serverMessageId  服务器返回的 serverMessageId，非本地数据库中的消息id，
+  /// 聊天对象， JMSingle | JMGroup
+  /// serverMessageId  服务器返回的 serverMessageId，非本地数据库中的消息id，
   Future<dynamic> getMessageByServerMessageId({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? serverMessageId,
+    required String? serverMessageId,
   }) async {
     Map param = type.toJson();
 
@@ -929,18 +922,14 @@ class JmessageFlutter {
     return JMNormalMessage.generateMessageFromJson(msgMap);
   }
 
-  /**
-   * 获取本地单条消息
-   *
-   * @param target    聊天对象， JMSingle | JMGroup
-   * @param messageId 本地数据库中的消息id，非 serverMessageId
-   *
-   * */
+  /// 获取本地单条消息
+  /// target    聊天对象， JMSingle | JMGroup
+  /// messageId 本地数据库中的消息id，非 serverMessageId
   Future<dynamic> getMessageById({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? messageId,
+    required String? messageId,
   }) async {
     Map param = type.toJson();
 
@@ -955,18 +944,14 @@ class JmessageFlutter {
     return JMNormalMessage.generateMessageFromJson(msgMap);
   }
 
-  /**
-   * 删除本地单条消息
-   *
-   * @param target    聊天对象， JMSingle | JMGroup
-   * @param messageId 本地数据库中的消息id，非serverMessageId
-   *
-   * */
+  /// 删除本地单条消息
+  /// target    聊天对象， JMSingle | JMGroup
+  /// messageId 本地数据库中的消息id，非serverMessageId
   Future<void> deleteMessageById({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? messageId,
+    required String? messageId,
   }) async {
     Map param = type.toJson();
 
@@ -982,8 +967,8 @@ class JmessageFlutter {
   }
 
   Future<void> sendInvitationRequest({
-    @required String? username,
-    @required String? reason,
+    required String? username,
+    required String? reason,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -998,7 +983,7 @@ class JmessageFlutter {
   }
 
   Future<void> acceptInvitation({
-    @required String? username,
+    required String? username,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1012,8 +997,8 @@ class JmessageFlutter {
   }
 
   Future<void> declineInvitation({
-    @required String? username,
-    @required String? reason,
+    required String? username,
+    required String? reason,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1028,7 +1013,7 @@ class JmessageFlutter {
   }
 
   Future<void> removeFromFriendList({
-    @required String? username,
+    required String? username,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1042,8 +1027,8 @@ class JmessageFlutter {
   }
 
   Future<void> updateFriendNoteName({
-    @required String? username,
-    @required String? noteName,
+    required String? username,
+    required String? noteName,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1058,8 +1043,8 @@ class JmessageFlutter {
   }
 
   Future<void> updateFriendNoteText({
-    @required String? username,
-    @required String? noteText,
+    required String? username,
+    required String? noteText,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1100,7 +1085,7 @@ class JmessageFlutter {
     return res;
   }
 
-  Future<JMGroupInfo> getGroupInfo({@required String? id}) async {
+  Future<JMGroupInfo> getGroupInfo({required String? id}) async {
     Map groupJson = await _channel.invokeMethod(
         'getGroupInfo', {'id': id}..removeWhere((key, value) => value == null));
 
@@ -1108,7 +1093,7 @@ class JmessageFlutter {
   }
 
   Future<void> updateGroupInfo({
-    @required String? id,
+    required String? id,
     String? newName,
     String? newDesc,
   }) async {
@@ -1121,8 +1106,8 @@ class JmessageFlutter {
   }
 
   Future<void> addGroupMembers({
-    @required String? id,
-    @required List<String>? usernameArray,
+    required String? id,
+    required List<String>? usernameArray,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1137,8 +1122,8 @@ class JmessageFlutter {
   }
 
   Future<void> removeGroupMembers({
-    @required String? id,
-    @required List<String>? usernames,
+    required String? id,
+    required List<String>? usernames,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1152,15 +1137,14 @@ class JmessageFlutter {
     return;
   }
 
-  Future<void> exitGroup({@required String? id}) async {
+  Future<void> exitGroup({required String? id}) async {
     await _channel.invokeMethod(
         'exitGroup', {'id': id}..removeWhere((key, value) => value == null));
 
     return;
   }
 
-  Future<List<JMGroupMemberInfo>> getGroupMembers(
-      {@required String? id}) async {
+  Future<List<JMGroupMemberInfo>> getGroupMembers({required String? id}) async {
     List membersJsons = await _channel.invokeMethod('getGroupMembers',
         {'id': id}..removeWhere((key, value) => value == null));
 
@@ -1171,7 +1155,7 @@ class JmessageFlutter {
   }
 
   Future<void> addUsersToBlacklist(
-      {@required List<String>? usernameArray, String? appKey}) async {
+      {required List<String>? usernameArray, String? appKey}) async {
     await _channel.invokeMethod(
         'addUsersToBlacklist',
         {'usernameArray': usernameArray, 'appKey': appKey}
@@ -1180,7 +1164,7 @@ class JmessageFlutter {
   }
 
   Future<void> removeUsersFromBlacklist(
-      {@required List<String>? usernameArray, String? appKey}) async {
+      {required List<String>? usernameArray, String? appKey}) async {
     await _channel.invokeMethod(
         'removeUsersFromBlacklist',
         {'usernameArray': usernameArray, 'appKey': appKey}
@@ -1196,8 +1180,8 @@ class JmessageFlutter {
   }
 
   Future<void> setNoDisturb({
-    @required dynamic target, // (JMSingle | JMGroup)
-    @required bool? isNoDisturb,
+    required dynamic target, // (JMSingle | JMGroup)
+    required bool? isNoDisturb,
   }) async {
     var param = target.toJson();
     param['isNoDisturb'] = isNoDisturb;
@@ -1219,7 +1203,7 @@ class JmessageFlutter {
     return {'userInfos': users, 'groupInfos': groups};
   }
 
-  Future<void> setNoDisturbGlobal({@required bool? isNoDisturb}) async {
+  Future<void> setNoDisturbGlobal({required bool? isNoDisturb}) async {
     await _channel.invokeMethod(
         'setNoDisturbGlobal',
         {'isNoDisturb': isNoDisturb}
@@ -1233,8 +1217,8 @@ class JmessageFlutter {
   }
 
   Future<void> blockGroupMessage({
-    @required String? id,
-    @required bool? isBlock,
+    required String? id,
+    required bool? isBlock,
   }) async {
     await _channel.invokeMethod(
         'blockGroupMessage',
@@ -1244,7 +1228,7 @@ class JmessageFlutter {
   }
 
   Future<bool> isGroupBlocked({
-    @required String? id,
+    required String? id,
   }) async {
     Map resJson = await _channel.invokeMethod('isGroupBlocked',
         {'id': id}..removeWhere((key, value) => value == null));
@@ -1259,7 +1243,7 @@ class JmessageFlutter {
   }
 
   Future<Map> downloadThumbUserAvatar({
-    @required String? username,
+    required String? username,
     String? appKey,
   }) async {
     Map resJson = await _channel.invokeMethod(
@@ -1277,7 +1261,7 @@ class JmessageFlutter {
   }
 
   Future<Map> downloadOriginalUserAvatar({
-    @required String? username,
+    required String? username,
     String? appKey,
   }) async {
     Map resJson = await _channel.invokeMethod(
@@ -1294,16 +1278,12 @@ class JmessageFlutter {
     };
   }
 
-  /**
-   * 下载缩略图
-   *
-   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-   * @param messageId 本地数据库中的消息 id,非 serverMessageId
-   *
-   * */
+  /// 下载缩略图
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id,非 serverMessageId
   Future<Map> downloadThumbImage({
-    @required dynamic target,
-    @required String? messageId,
+    required dynamic target,
+    required String? messageId,
   }) async {
     Map param = target.toJson();
     param['messageId'] = messageId;
@@ -1313,16 +1293,12 @@ class JmessageFlutter {
     return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
   }
 
-  /**
-   * 下载原图
-   *
-   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-   * @param messageId 本地数据库中的消息 id,非 serverMessageId
-   *
-   * */
+  /// 下载原图
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id,非 serverMessageId
   Future<Map> downloadOriginalImage({
-    @required dynamic target,
-    @required String? messageId,
+    required dynamic target,
+    required String? messageId,
   }) async {
     Map param = target.toJson();
     param['messageId'] = messageId;
@@ -1332,16 +1308,12 @@ class JmessageFlutter {
     return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
   }
 
-  /**
-   * 下载语音
-   *
-   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-   * @param messageId 本地数据库中的消息 id,非 serverMessageId
-   *
-   * */
+  /// 下载语音
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id,非 serverMessageId
   Future<Map> downloadVoiceFile({
-    @required dynamic target,
-    @required String? messageId,
+    required dynamic target,
+    required String? messageId,
   }) async {
     Map param = target.toJson();
     param['messageId'] = messageId;
@@ -1351,16 +1323,12 @@ class JmessageFlutter {
     return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
   }
 
-  /**
-   * 下载文件
-   *
-   * @param target    聊天对象， JMSingle | JMGroup | JMChatRoom
-   * @param messageId 本地数据库中的消息 id
-   *
-   * */
+  /// 下载文件
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id
   Future<Map> downloadFile({
-    @required dynamic target,
-    @required String? messageId,
+    required dynamic target,
+    required String? messageId,
   }) async {
     Map param = target.toJson();
     param['messageId'] = messageId;
@@ -1371,7 +1339,7 @@ class JmessageFlutter {
   }
 
   Future<JMConversationInfo> createConversation({
-    @required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
+    required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
   }) async {
     Map param = target.toJson();
     Map resJson = await _channel.invokeMethod('createConversation',
@@ -1381,7 +1349,7 @@ class JmessageFlutter {
   }
 
   Future<void> deleteConversation({
-    @required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
+    required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
   }) async {
     Map param = target.toJson();
     await _channel.invokeMethod('deleteConversation',
@@ -1391,7 +1359,7 @@ class JmessageFlutter {
   }
 
   Future<void> enterConversation({
-    @required dynamic target, //(JMSingle | JMGroup)
+    required dynamic target, //(JMSingle | JMGroup)
   }) async {
     if (_platform.isAndroid) {
       Map param = target.toJson();
@@ -1403,7 +1371,7 @@ class JmessageFlutter {
   }
 
   Future<void> exitConversation({
-    @required dynamic target, //(JMSingle | JMGroup)
+    required dynamic target, //(JMSingle | JMGroup)
   }) async {
     if (_platform.isAndroid) {
       Map param = target.toJson();
@@ -1415,7 +1383,7 @@ class JmessageFlutter {
   }
 
   Future<JMConversationInfo> getConversation({
-    @required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
+    required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
   }) async {
     Map param = target.toJson();
     Map resJson = await _channel.invokeMethod(
@@ -1433,7 +1401,7 @@ class JmessageFlutter {
   }
 
   Future<void> resetUnreadMessageCount({
-    @required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
+    required dynamic target, //(JMSingle | JMGroup | JMChatRoom)
   }) async {
     Map param = target.toJson();
     await _channel.invokeMethod('resetUnreadMessageCount',
@@ -1443,8 +1411,8 @@ class JmessageFlutter {
   }
 
   Future<void> transferGroupOwner({
-    @required String? groupId,
-    @required String? username,
+    required String? groupId,
+    required String? username,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1459,9 +1427,9 @@ class JmessageFlutter {
   }
 
   Future<void> setGroupMemberSilence({
-    @required String? groupId,
-    @required bool? isSilence,
-    @required String? username,
+    required String? groupId,
+    required bool? isSilence,
+    required String? username,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1477,8 +1445,8 @@ class JmessageFlutter {
   }
 
   Future<bool> isSilenceMember({
-    @required String? groupId,
-    @required String? username,
+    required String? groupId,
+    required String? username,
     String? appKey,
   }) async {
     Map resJson = await _channel.invokeMethod(
@@ -1492,7 +1460,7 @@ class JmessageFlutter {
   }
 
   Future<List<JMUserInfo>> groupSilenceMembers({
-    @required String? groupId,
+    required String? groupId,
   }) async {
     List memberJsons = await _channel.invokeMethod(
         'groupSilenceMembers',
@@ -1505,9 +1473,9 @@ class JmessageFlutter {
   }
 
   Future<void> setGroupNickname({
-    @required String? groupId,
-    @required String? nickName,
-    @required String? username,
+    required String? groupId,
+    required String? nickName,
+    required String? username,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1523,7 +1491,7 @@ class JmessageFlutter {
   }
 
   Future<JMConversationInfo> enterChatRoom({
-    @required String? roomId,
+    required String? roomId,
   }) async {
     Map resJson = await _channel.invokeMethod('enterChatRoom',
         {'roomId': roomId}..removeWhere((key, value) => value == null));
@@ -1532,7 +1500,7 @@ class JmessageFlutter {
   }
 
   Future<void> exitChatRoom({
-    @required String? roomId,
+    required String? roomId,
   }) async {
     await _channel.invokeMethod('exitChatRoom',
         {'roomId': roomId}..removeWhere((key, value) => value == null));
@@ -1541,7 +1509,7 @@ class JmessageFlutter {
   }
 
   Future<JMConversationInfo> getChatRoomConversation({
-    @required String? roomId,
+    required String? roomId,
   }) async {
     Map resJson = await _channel.invokeMethod('getChatRoomConversation',
         {'roomId': roomId}..removeWhere((key, value) => value == null));
@@ -1564,8 +1532,8 @@ class JmessageFlutter {
   }
 
   Future<void> addGroupAdmins({
-    @required String? groupId,
-    @required List<String>? usernames,
+    required String? groupId,
+    required List<String>? usernames,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1576,8 +1544,8 @@ class JmessageFlutter {
   }
 
   Future<void> removeGroupAdmins({
-    @required String? groupId,
-    @required List<String>? usernames,
+    required String? groupId,
+    required List<String>? usernames,
     String? appKey,
   }) async {
     await _channel.invokeMethod(
@@ -1588,8 +1556,8 @@ class JmessageFlutter {
   }
 
   Future<void> changeGroupType({
-    @required String? groupId,
-    @required JMGroupType? type,
+    required String? groupId,
+    required JMGroupType? type,
   }) async {
     await _channel.invokeMethod(
         'changeGroupType',
@@ -1599,9 +1567,9 @@ class JmessageFlutter {
   }
 
   Future<List<JMGroupInfo>> getPublicGroupInfos({
-    @required String? appKey,
-    @required num? start,
-    @required num? count,
+    required String? appKey,
+    required num? start,
+    required num? count,
   }) async {
     List groupJsons = await _channel.invokeMethod(
         'getPublicGroupInfos',
@@ -1613,7 +1581,7 @@ class JmessageFlutter {
   }
 
   Future<void> applyJoinGroup({
-    @required String? groupId,
+    required String? groupId,
     String? reason,
   }) async {
     await _channel.invokeMethod(
@@ -1625,9 +1593,9 @@ class JmessageFlutter {
   }
 
   Future<void> processApplyJoinGroup({
-    @required List<String>? events,
-    @required bool? isAgree,
-    @required bool? isRespondInviter,
+    required List<String>? events,
+    required bool? isAgree,
+    required bool? isRespondInviter,
     String? reason,
   }) async {
     await _channel.invokeMethod(
@@ -1643,7 +1611,7 @@ class JmessageFlutter {
   }
 
   Future<void> dissolveGroup({
-    @required String? groupId,
+    required String? groupId,
   }) async {
     await _channel.invokeMethod(
         'dissolveGroup',
@@ -1656,8 +1624,8 @@ class JmessageFlutter {
 
   /// 会话间透传命令，只支持 single、group，不支持 chatRoom
   Future<void> sendMessageTransCommand({
-    @required String? message,
-    @required dynamic target, //(JMSingle | JMGroup)
+    required String? message,
+    required dynamic target, //(JMSingle | JMGroup)
   }) async {
     if (target is JMChatRoom) {
       print("does not support chatroom message trans.");
@@ -1673,8 +1641,8 @@ class JmessageFlutter {
 
   /// 设备间透传命令
   Future<void> sendCrossDeviceTransCommand({
-    @required String? message,
-    @required JMPlatformType? platform,
+    required String? message,
+    required JMPlatformType? platform,
   }) async {
     Map param = Map();
     param["message"] = message;
@@ -1692,10 +1660,10 @@ class JmessageFlutter {
   *
   * */
   Future<int> getMessageUnreceiptCount({
-    @required dynamic target,
+    required dynamic target,
 
     /// (JMSingle | JMGroup)
-    @required String? msgId,
+    required String? msgId,
   }) async {
     print(flutterLog + "getMessageUnreceiptCount" + " msgid = $msgId");
 
@@ -1722,11 +1690,11 @@ class JmessageFlutter {
    *
    */
   void getMessageReceiptDetails({
-    @required dynamic target,
+    required dynamic target,
 
     /// (JMSingle | JMGroup)
-    @required String? msgId,
-    @required JMCallback? callback,
+    required String? msgId,
+    required JMCallback? callback,
   }) async {
     print(flutterLog + "getMessageUnreceiptCount" + " msgid = $msgId");
 
@@ -1742,7 +1710,7 @@ class JmessageFlutter {
     Map param = target.toJson();
     param["id"] = msgId;
 
-    Map resultMap = await _channel.invokeMethod('getMessageReceiptDetails',
+    Map? resultMap = await _channel.invokeMethod('getMessageReceiptDetails',
         param..removeWhere((key, value) => value == null));
     if (resultMap != null) {
       List receiptJosnList = resultMap["receiptList"];
@@ -1758,18 +1726,15 @@ class JmessageFlutter {
     }
   }
 
-  /*
-  *  将消息设置为已读
-  *  @param target    消息所处的会话对象，user or group
-  *  @param msgId     消息本地 id，即：message.id
-  *
-  *  @return true/false 设置成功返回 true，设置失败返回 false
-  * */
+  /// 将消息设置为已读
+  /// target    消息所处的会话对象，user or group
+  /// msgId     消息本地 id，即：message.id
+  /// true/false 设置成功返回 true，设置失败返回 false
   Future<bool> setMessageHaveRead({
-    @required dynamic target,
+    required dynamic target,
 
     /// (JMSingle | JMGroup)
-    @required String? msgId,
+    required String? msgId,
   }) async {
     print(flutterLog + "setMessageHaveRead" + " msgid = $msgId");
 
@@ -1785,19 +1750,14 @@ class JmessageFlutter {
     return isSuccess;
   }
 
-  /*
-  * 获取消息已读状态
-  *
-  * @param target    消息所处的会话对象，user or group
-  * @param msgId     消息本地 id，即：message.id
-  *
-  * @return
-  * */
+  /// 获取消息已读状态
+  /// target    消息所处的会话对象，user or group
+  /// msgId     消息本地 id，即：message.id
   Future<bool> getMessageHaveReadStatus({
-    @required dynamic target,
+    required dynamic target,
 
     /// (JMSingle | JMGroup)
-    @required String? msgId,
+    required String? msgId,
   }) async {
     print(flutterLog + "getMessageHaveReadStatus" + " msgid = $msgId");
 
@@ -1858,6 +1818,9 @@ class JMGroup {
   }
 
   JMGroup.fromJson(Map<dynamic, dynamic> json) : groupId = json['groupId'];
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 class JMChatRoom {
@@ -1876,6 +1839,9 @@ class JMChatRoom {
   }
 
   JMChatRoom.fromJson(Map<dynamic, dynamic> json) : roomId = json['roomId'];
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 // export type JMAllType = (JMSingle | JMGroup | JMChatRoom);
@@ -2011,6 +1977,9 @@ class JMUserInfo {
         isFriend = json['isFriend'],
         gender = getEnumFromString(JMGender.values, json['gender']),
         extras = json['extras'];
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 enum JMMessageState {
@@ -2065,10 +2034,8 @@ class JMNormalMessage {
     }
   }
 
-  static dynamic generateMessageFromJson(Map<dynamic, dynamic> json) {
-    if (json == null) {
-      return null;
-    }
+  static dynamic generateMessageFromJson(Map<dynamic, dynamic>? json) {
+    if (json == null) return null;
 
     JMMessageType type = getEnumFromString(JMMessageType.values, json['type']);
     switch (type) {
@@ -2428,7 +2395,7 @@ class JMGroupInfo {
         isBlocked = json['isBlocked'],
         groupType = getEnumFromString(JMGroupType.values, json['groupType']);
 
-  Future<void> exitGroup({@required String? id}) async {
+  Future<void> exitGroup({required String? id}) async {
     await JmessageFlutter().exitGroup(id: id);
     return;
   }
@@ -2444,6 +2411,9 @@ class JMGroupInfo {
     );
     return;
   }
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 enum JMGroupMemberType {
@@ -2510,6 +2480,9 @@ class JMChatRoomInfo {
         createTime = json['createTime'],
         maxMemberCount = json['maxMemberCount'],
         memberCount = json['memberCount'];
+
+  @override
+  int get hashCode => super.hashCode;
 }
 
 class JMConversationInfo {
@@ -2567,7 +2540,7 @@ class JMConversationInfo {
 
   // sendText
   Future<JMTextMessage> sendTextMessage({
-    @required String? text,
+    required String? text,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -2581,7 +2554,7 @@ class JMConversationInfo {
 
   // sendImage
   Future<JMImageMessage> sendImageMessage({
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -2596,7 +2569,7 @@ class JMConversationInfo {
 
   // sendVoice
   Future<JMVoiceMessage> sendVoiceMessage({
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -2611,7 +2584,7 @@ class JMConversationInfo {
 
   // sendCustom
   Future<JMCustomMessage> sendCustomMessage({
-    @required Map<dynamic, dynamic>? customObject,
+    required Map<dynamic, dynamic>? customObject,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -2626,9 +2599,9 @@ class JMConversationInfo {
 
   // sendLocation
   Future<JMLocationMessage> sendLocationMessage({
-    @required double? latitude,
-    @required double? longitude,
-    @required int? scale,
+    required double? latitude,
+    required double? longitude,
+    required int? scale,
     String? address,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
@@ -2647,10 +2620,10 @@ class JMConversationInfo {
 
   // sendFile
   Future<JMFileMessage> sendFileMessage({
-    @required dynamic type,
+    required dynamic type,
 
     /// (JMSingle | JMGroup | JMChatRoom)
-    @required String? path,
+    required String? path,
     JMMessageSendOptions? sendOption,
     Map<dynamic, dynamic>? extras,
   }) async {
@@ -2665,9 +2638,7 @@ class JMConversationInfo {
 
   // getHistoryMessages
   Future<List> getHistoryMessages(
-      {@required int? from,
-      @required int? limit,
-      bool isDescend = false}) async {
+      {required int? from, required int? limit, bool isDescend = false}) async {
     List msgs = await JmessageFlutter().getHistoryMessages(
         type: target.targetType,
         from: from,

@@ -197,7 +197,7 @@ class _GroupManageViewState extends State<GroupManageView> {
   void demoAddMember() async {
     print("demoAddMember ");
 
-    if (usernameTextEC1.text == null) {
+    if (usernameTextEC1.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【添加群成员】username 不能为空";
@@ -223,7 +223,7 @@ class _GroupManageViewState extends State<GroupManageView> {
   void demoRemoveMember() async {
     print("demoRemoveMember ");
 
-    if (usernameTextEC1.text == null) {
+    if (usernameTextEC1.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【移除群成员】username 不能为空";
@@ -322,7 +322,7 @@ class _GroupManageViewState extends State<GroupManageView> {
       _loading = true;
     });
 
-    if (usernameTextEC1.text == null || usernameTextEC1.text == "") {
+    if (usernameTextEC1.text.isEmpty) {
       setState(() {
         _loading = false;
         _result = "【创建公开群】group name 不能为空";
