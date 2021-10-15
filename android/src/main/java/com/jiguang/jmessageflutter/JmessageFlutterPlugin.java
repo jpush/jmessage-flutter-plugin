@@ -312,6 +312,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             setMessageHaveRead(call, result);
         } else if (call.method.equals("sendVideoMessage")) {
             sendVideoMessage(call, result);
+        } else if(call.method.equals("getMessageHaveReadStatus")){
+            getMessageHaveReadStatus(call,result);
         } else {
             result.notImplemented();
         }
