@@ -316,6 +316,7 @@
       
       NSArray *userArr = [eventContent getEventToUsernameList];
       dict[@"usernames"] = userArr;
+      dict[@"nicknames"] = userArr;
         
       switch (eventContent.eventType) {
         case kJMSGEventNotificationAcceptedFriendInvitation: {

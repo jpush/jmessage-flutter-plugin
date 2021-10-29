@@ -315,6 +315,11 @@ class JsonUtils {
                 if (usernameList != null) {
                     result.put("usernames", toJson(usernameList));
                 }
+
+                List displayNameList = ((EventNotificationContent) content).getUserDisplayNames();
+                if (usernameList != null) {
+                    result.put("nicknames", toJson(displayNameList));
+                }
                 switch (((EventNotificationContent) content).getEventNotificationType()) {
                     case group_member_added:
                         // 群成员加群事件
