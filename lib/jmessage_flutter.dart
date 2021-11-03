@@ -1508,12 +1508,14 @@ class JmessageFlutter {
     return;
   }
 
-  Future<JMConversationInfo> getChatRoomConversation({
+  Future<JMConversationInfo?> getChatRoomConversation({
     required String? roomId,
   }) async {
     Map resJson = await _channel.invokeMethod('getChatRoomConversation',
         {'roomId': roomId}..removeWhere((key, value) => value == null));
-
+    if(resJson == null || resJson.isEmpty){
+      return null;
+    }
     return JMConversationInfo.fromJson(resJson);
   }
 
