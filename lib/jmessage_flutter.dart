@@ -2218,17 +2218,20 @@ enum JMEventType { group_member_added, group_member_removed, group_member_exit }
 class JMEventMessage extends JMNormalMessage {
   JMEventType eventType; // 事件类型
   List<dynamic> usernames; // List<String>
+  List<dynamic> nicknames; // List<String>
 
   Map toJson() {
     var json = super.toJson();
     json['eventType'] = getStringFromEnum(eventType);
     json['usernames'] = usernames;
+    json['nicknames'] = nicknames;
     return json;
   }
 
   JMEventMessage.fromJson(Map<dynamic, dynamic> json)
       : eventType = getEnumFromString(JMEventType.values, json['eventType']),
         usernames = json['usernames'],
+        nicknames = json['nicknames'],
         super.fromJson(json);
 }
 
