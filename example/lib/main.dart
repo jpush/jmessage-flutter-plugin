@@ -1003,7 +1003,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       test('getChatRoomConversation', () async {
-        JMConversationInfo conv =
+        JMConversationInfo? conv =
             await jmessage.getChatRoomConversation(roomId: kMockChatRoomid);
         verifyConversation(conv);
       });
@@ -1267,8 +1267,11 @@ void verifyGroupMember(JMGroupMemberInfo groupMember) {
   verifyUser(groupMember.user);
 }
 
-void verifyConversation(JMConversationInfo conversation) {
+void verifyConversation(JMConversationInfo? conversation) {
   expect(conversation, isNotNull, reason: 'conversation is null');
+  if(null == conversation){
+    return;
+  }
   expect(conversation.conversationType, isNotNull,
       reason: 'conversation conversationType is null');
   expect(conversation.title, isNotNull, reason: 'conversation title is null');
