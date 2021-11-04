@@ -414,10 +414,6 @@ class JsonUtils {
     static HashMap toJson(Conversation conversation) {
 
         final HashMap json = new HashMap<String, Object>();
-        if (null == conversation){
-            return json;
-        }
-
         json.put("title", conversation.getTitle() != null ? conversation.getTitle() : "");
         json.put("unreadCount", conversation.getUnReadMsgCnt());
 

@@ -2728,6 +2728,10 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             JSONObject params = new JSONObject(map);
             chatRoomId = Long.parseLong(params.getString("roomId"));
             Conversation conversation = JMessageClient.getChatRoomConversation(chatRoomId);
+            if (null == conversation) {
+                handleResult(ERR_CODE_CONVERSATION, ERR_MSG_CONVERSATION, result);
+                return;
+            }
             result.success(toJson(conversation));
         } catch (Exception e) {
             e.printStackTrace();
