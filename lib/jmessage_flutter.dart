@@ -2450,7 +2450,7 @@ class JMGroupMemberInfo {
 class JMChatRoomInfo {
   String roomId; // 聊天室 id
   String name; // 聊天室名称
-  String appKey; // 聊天室所属应用的 App Key
+  String? appKey; // 聊天室所属应用的 App Key
   String description; // 聊天室描述信息
   int createTime; // 创建日期，单位：秒
   int maxMemberCount; // 最大成员数

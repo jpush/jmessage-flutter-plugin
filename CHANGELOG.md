@@ -1,3 +1,5 @@
+## 2.2.0
++修复  enterChatRoom getChatRoomConversation 方法
 ## 2.1.9
 +补充  nicknames 字段
 ## 2.1.8
