@@ -9,7 +9,7 @@ import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:platform/platform.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-const String kMockAppkey = "e58a32cb3e4469ebf31867e5"; //'你自己应用的 AppKey';
+const String kMockAppkey = "6f571d35cfcedc7f3150ce0b"; //'你自己应用的 AppKey';
 const String kMockUserName = '0001';
 const String kMockPassword = '1111';
 const String kCommonPassword = '123456a';
