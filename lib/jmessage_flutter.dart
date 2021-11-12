@@ -566,6 +566,10 @@ class JmessageFlutter {
     Map<dynamic, dynamic>? customObject,
     double? latitude,
     double? longitude,
+    String? thumbImagePath,
+    String? thumbFormat,
+    String? videoFileName,
+    int? duration,
     int? scale,
     String? address,
     Map<dynamic, dynamic>? extras,
@@ -587,6 +591,10 @@ class JmessageFlutter {
         'longitude': longitude,
         'scale': scale,
         'address': address,
+        'thumbImagePath': thumbImagePath,
+        'thumbFormat': thumbFormat,
+        'videoFileName': videoFileName,
+        'duration': duration,
       });
 
     Map resMap = await _channel.invokeMethod(
@@ -611,7 +619,9 @@ class JmessageFlutter {
       };
     }
 
-    param..addAll(optionMap)..addAll({'id': message?.id});
+    param
+      ..addAll(optionMap)
+      ..addAll({'id': message?.id});
     Map resMap = await _channel.invokeMethod(
         'sendDraftMessage', param..removeWhere((key, value) => value == null));
     var res = JMNormalMessage.generateMessageFromJson(resMap);
@@ -639,7 +649,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'text': text});
+    param
+      ..addAll(optionMap)
+      ..addAll({'text': text});
 
     Map resMap = await _channel.invokeMethod(
         'sendTextMessage', param..removeWhere((key, value) => value == null));
@@ -669,7 +681,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendImageMessage', param..removeWhere((key, value) => value == null));
@@ -699,7 +713,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendVoiceMessage', param..removeWhere((key, value) => value == null));
@@ -729,7 +745,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'customObject': customObject});
+    param
+      ..addAll(optionMap)
+      ..addAll({'customObject': customObject});
 
     Map resMap = await _channel.invokeMethod(
         'sendCustomMessage', param..removeWhere((key, value) => value == null));
@@ -798,7 +816,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendFileMessage', param..removeWhere((key, value) => value == null));
@@ -1334,6 +1354,21 @@ class JmessageFlutter {
     param['messageId'] = messageId;
     Map resJson = await _channel.invokeMethod(
         'downloadFile', param..removeWhere((key, value) => value == null));
+
+    return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
+  }
+
+  /// 下载视频
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id
+  Future<Map> downloadVideoFile({
+    required dynamic target,
+    required String? messageId,
+  }) async {
+    Map param = target.toJson();
+    param['messageId'] = messageId;
+    Map resJson = await _channel.invokeMethod(
+        'downloadVideoFile', param..removeWhere((key, value) => value == null));
 
     return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
   }
@@ -2055,7 +2090,7 @@ class JMNormalMessage {
       case JMMessageType.prompt:
         return JMPromptMessage.fromJson(json);
       case JMMessageType.video:
-        return JMPromptMessage.fromJson(json);
+        return JMVideoMessage.fromJson(json);
     }
   }
 }

@@ -252,6 +252,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             downloadVoiceFile(call, result);
         } else if (call.method.equals("downloadFile")) {
             downloadFile(call, result);
+        } else if (call.method.equals("downloadVideoFile")) {
+            downloadVideoFile(call, result);
         } else if (call.method.equals("createConversation")) {
             createConversation(call, result);
         } else if (call.method.equals("deleteConversation")) {
@@ -770,6 +772,34 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
                     int scale = params.getInt("scale");
                     String address = params.getString("address");
                     content = new LocationContent(latitude, longitude, scale, address);
+                    break;
+                case "video":
+                    String thumbImagePath = "", thumbFormat = "", videoPath, videoFileName = "";
+                    videoPath = params.getString("path");
+                    if (params.has("thumbFormat")) {
+                        thumbFormat = params.getString("thumbFormat");
+                    }
+                    if (params.has("thumbImagePath")) {
+                        thumbImagePath = params.getString("thumbImagePath");
+                    }
+                    if (params.has("duration")) {
+                        duration = params.getInt("duration");
+                    } else {
+                        mediaPlayer = MediaPlayer.create(mContext, Uri.parse(videoPath));
+                        duration = mediaPlayer.getDuration() / 1000;
+                        mediaPlayer.release();
+                    }
+                    if (params.has("videoFileName")) {
+                        videoFileName = params.getString("videoFileName");
+                    }
+
+                    File videoFile = getFile(videoPath);
+
+                    Bitmap bitmap = null;
+                    if (!TextUtils.isEmpty(thumbImagePath)) {
+                        bitmap = BitmapFactory.decodeFile(thumbImagePath);
+                    }
+                    content = new VideoContent(bitmap, thumbFormat, videoFile, videoFileName, duration);
                     break;
                 default:
                     content = new CustomContent();
@@ -2390,7 +2420,6 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
     private void downloadFile(MethodCall call, final Result result) {
         HashMap<String, Object> map = call.arguments();
         final Message msg;
-
         try {
             JSONObject params = new JSONObject(map);
             msg = JMessageUtils.getMessage(params);
@@ -2411,6 +2440,44 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
 
         FileContent content = (FileContent) msg.getContent();
         content.downloadFile(msg, new DownloadCompletionCallback() {
+            @Override
+            public void onComplete(int status, String desc, File file) {
+                if (status == 0) {
+                    HashMap res = new HashMap();
+                    res.put("messageId", msg.getId());
+                    res.put("filePath", file.getAbsolutePath());
+                    handleResult(res, status, desc, result);
+
+                } else {
+                    handleResult(status, desc, result);
+                }
+            }
+        });
+    }
+
+    private void downloadVideoFile(MethodCall call, final Result result) {
+        HashMap<String, Object> map = call.arguments();
+        final Message msg;
+        try {
+            JSONObject params = new JSONObject(map);
+            msg = JMessageUtils.getMessage(params);
+            if (msg == null) {
+                handleResult(ERR_CODE_MESSAGE, ERR_MSG_MESSAGE, result);
+                return;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+            return;
+        }
+
+        if (msg.getContentType() != ContentType.video) {
+            handleResult(ERR_CODE_MESSAGE, "Message type isn't video", result);
+            return;
+        }
+
+        VideoContent content = (VideoContent) msg.getContent();
+        content.downloadVideoFile(msg, new DownloadCompletionCallback() {
             @Override
             public void onComplete(int status, String desc, File file) {
                 if (status == 0) {
