@@ -297,6 +297,15 @@
       dict[@"thumbPath"] = [imageContent thumbImageLocalPath];
       break;
     }
+    case kJMSGContentTypeVideo: {
+      dict[@"type"] = @"video";
+        JMSGVideoContent *videoContent = (JMSGVideoContent *) self.content;
+        dict[@"videoPath"] = [videoContent originMediaLocalPath];
+        dict[@"thumbImagePath"] = [videoContent videoThumbImageLocalPath];
+        dict[@"duration"] = [videoContent duration];
+        dict[@"videoFileName"] = [videoContent fileName];
+        break;
+    }
     case kJMSGContentTypeVoice: {
       dict[@"type"] = @"voice";
       dict[@"path"] = [self getOriginMediaFilePath];

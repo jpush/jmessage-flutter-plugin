@@ -314,8 +314,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             setMessageHaveRead(call, result);
         } else if (call.method.equals("sendVideoMessage")) {
             sendVideoMessage(call, result);
-        } else if(call.method.equals("getMessageHaveReadStatus")){
-            getMessageHaveReadStatus(call,result);
+        } else if (call.method.equals("getMessageHaveReadStatus")) {
+            getMessageHaveReadStatus(call, result);
         } else {
             result.notImplemented();
         }
@@ -775,7 +775,7 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
                     break;
                 case "video":
                     String thumbImagePath = "", thumbFormat = "", videoPath, videoFileName = "";
-                    videoPath = params.getString("path");
+                    videoPath = params.getString("videoPath");
                     if (params.has("thumbFormat")) {
                         thumbFormat = params.getString("thumbFormat");
                     }
@@ -2318,13 +2318,11 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             return;
         }
 
-        if (msg.getContentType() != ContentType.image) {
-            handleResult(ERR_CODE_MESSAGE, "Message type isn't image", result);
+        if (msg.getContentType() != ContentType.image && msg.getContentType() != ContentType.video) {
+            handleResult(ERR_CODE_MESSAGE, "Message type isn't image/video", result);
             return;
         }
-
-        ImageContent content = (ImageContent) msg.getContent();
-        content.downloadThumbnailImage(msg, new DownloadCompletionCallback() {
+        DownloadCompletionCallback cb = new DownloadCompletionCallback() {
             @Override
             public void onComplete(int status, String desc, File file) {
                 if (status == 0) {
@@ -2332,12 +2330,20 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
                     res.put("messageId", msg.getId());
                     res.put("filePath", file.getAbsolutePath());
                     handleResult(res, status, desc, result);
-
                 } else {
                     handleResult(status, desc, result);
                 }
             }
-        });
+        };
+        if (msg.getContentType() == ContentType.image) {
+            ImageContent content = (ImageContent) msg.getContent();
+            content.downloadThumbnailImage(msg, cb);
+        } else {
+            VideoContent content = (VideoContent) msg.getContent();
+            content.downloadThumbImage(msg, cb);
+        }
+
+
     }
 
     private void downloadOriginalImage(MethodCall call, final Result result) {

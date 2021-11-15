@@ -566,6 +566,7 @@ class JmessageFlutter {
     Map<dynamic, dynamic>? customObject,
     double? latitude,
     double? longitude,
+    String? videoPath,
     String? thumbImagePath,
     String? thumbFormat,
     String? videoFileName,
@@ -591,6 +592,7 @@ class JmessageFlutter {
         'longitude': longitude,
         'scale': scale,
         'address': address,
+        'videoPath': videoPath,
         'thumbImagePath': thumbImagePath,
         'thumbFormat': thumbFormat,
         'videoFileName': videoFileName,
@@ -2194,9 +2196,9 @@ class JMLocationMessage extends JMNormalMessage {
 
 class JMVideoMessage extends JMNormalMessage {
   String videoPath; // 视频地址
-  String thumbFormat; //视频缩略图格式名
+  String? thumbFormat; //视频缩略图格式名
   int duration; // 视频时长
-  String thumbImagePath; // 视频缩略图
+  String? thumbImagePath; // 视频缩略图
   String videoFileName; // 视频名称
 
   Map toJson() {
