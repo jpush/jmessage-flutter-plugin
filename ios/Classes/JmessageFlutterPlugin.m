@@ -410,6 +410,8 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       [self getMessageByServerMessageId:call result:result];
   } else if([@"deleteMessageById" isEqualToString:call.method]) {
     [self deleteMessageById:call result:result];
+  } else if([@"deleteAllMessage" isEqualToString:call.method]) {
+    [self deleteAllMessage:call result:result];
   } else if([@"sendInvitationRequest" isEqualToString:call.method]) {
     [self sendInvitationRequest:call result:result];
   } else if([@"acceptInvitation" isEqualToString:call.method]) {
@@ -1320,6 +1322,25 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       result(nil);
     } else {
       NSError *error = [NSError errorWithDomain:@"delete message fail!" code: 1 userInfo: nil];
+      result([error flutterError]);
+    }
+  }];
+}
+
+- (void)deleteAllMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSDictionary *param = call.arguments;
+  [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+    if (error) {
+      result([error flutterError]);
+      return;
+    }
+    
+    BOOL res = [conversation deleteAllMessages];
+    
+    if (res) {
+      result(nil);
+    } else {
+      NSError *error = [NSError errorWithDomain:@"delete all message fail!" code: 1 userInfo: nil];
       result([error flutterError]);
     }
   }];

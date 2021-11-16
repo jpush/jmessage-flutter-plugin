@@ -988,6 +988,19 @@ class JmessageFlutter {
     return;
   }
 
+  /// 删除全部消息
+  /// target    聊天对象， JMSingle | JMGroup
+  Future<void> deleteAllMessage({
+    required dynamic type,
+
+    /// (JMSingle | JMGroup | JMChatRoom)
+  }) async {
+    Map param = type.toJson();
+    await _channel.invokeMethod(
+        'deleteAllMessage', param..removeWhere((key, value) => value == null));
+    return;
+  }
+
   Future<void> sendInvitationRequest({
     required String? username,
     required String? reason,

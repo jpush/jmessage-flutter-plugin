@@ -182,7 +182,7 @@
       dict[@"memberType"] = @"ordinary";
       break;
     case kJMSGGroupMemberTypeOwner:
-      
+      dict[@"memberType"] = @"owner";
       break;
     case kJMSGGroupMemberTypeAdmin:
       dict[@"memberType"] = @"admin";

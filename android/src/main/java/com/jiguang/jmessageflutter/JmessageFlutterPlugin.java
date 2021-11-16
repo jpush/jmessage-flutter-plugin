@@ -22,6 +22,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import cn.jmessage.support.google.gson.Gson;
+import cn.jmessage.support.google.gson.GsonBuilder;
+import cn.jmessage.support.google.gson.JsonObject;
+import cn.jmessage.support.google.gson.JsonParser;
 import cn.jpush.im.android.api.ContactManager;
 import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.callback.CreateGroupCallback;
@@ -190,6 +194,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             getMessageById(call, result);
         } else if (call.method.equals("deleteMessageById")) {
             deleteMessageById(call, result);
+        } else if (call.method.equals("deleteAllMessage")) {
+            deleteAllMessage(call, result);
         } else if (call.method.equals("sendInvitationRequest")) {
             sendInvitationRequest(call, result);
         } else if (call.method.equals("acceptInvitation")) {
@@ -693,9 +699,10 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
     private void setConversationExtras(MethodCall call, Result result) {
         HashMap<String, Object> map = call.arguments();
         Conversation conversation;
-        JSONObject extra = null;
+        String extra = null;
 
         try {
+            Gson gson = new Gson();
             JSONObject params = new JSONObject(map);
             conversation = JMessageUtils.getConversation(params);
 
@@ -705,7 +712,7 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             }
 
             if (params.has("extras")) {
-                extra = params.getJSONObject("extras");
+                extra = gson.toJson(map.get("extras"));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -713,7 +720,8 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             return;
         }
 
-        String extraStr = extra == null ? "" : extra.toString();
+        String extraStr = extra == null ? "" : extra;
+        Log.d(TAG, "setConversationExtras: " + extraStr);
         conversation.updateConversationExtra(extraStr);
         handleResult(toJson(conversation), 0, null, result);
     }
@@ -1537,6 +1545,33 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             HashMap error = new HashMap();
             error.put("code", ERR_CODE_MESSAGE);
             error.put("description", ERR_MSG_MESSAGE);
+            result.error(ERR_CODE_MESSAGE + "", ERR_MSG_MESSAGE, "");
+        }
+    }
+
+    private void deleteAllMessage(MethodCall call, Result result) {
+        HashMap<String, Object> map = call.arguments();
+        Conversation conversation;
+        try {
+            JSONObject params = new JSONObject(map);
+            conversation = JMessageUtils.getConversation(params);
+            if (conversation == null) {
+                handleResult(ERR_CODE_CONVERSATION, "Can't get conversation", result);
+                return;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            handleResult(ERR_CODE_PARAMETER, ERR_MSG_PARAMETER, result);
+            return;
+        }
+        boolean success = conversation.deleteAllMessage();
+
+        if (success) {
+            result.success(null);
+        } else {
+            HashMap error = new HashMap();
+            error.put("code", ERR_CODE_MESSAGE);
+            error.put("description", "no success");
             result.error(ERR_CODE_MESSAGE + "", ERR_MSG_MESSAGE, "");
         }
     }
