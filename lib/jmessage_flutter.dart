@@ -2262,7 +2262,19 @@ class JMPromptMessage extends JMNormalMessage {
         super.fromJson(json);
 }
 
-enum JMEventType { group_member_added, group_member_removed, group_member_exit }
+enum JMEventType {
+  group_member_added,
+  group_member_removed,
+  group_member_exit,
+  group_info_updated,
+  group_member_keep_silence,
+  group_member_keep_silence_cancel,
+  group_keeper_added,
+  group_keeper_removed,
+  group_dissolved,
+  group_owner_changed,
+  group_type_changed,
+}
 
 class JMEventMessage extends JMNormalMessage {
   JMEventType eventType; // 事件类型
