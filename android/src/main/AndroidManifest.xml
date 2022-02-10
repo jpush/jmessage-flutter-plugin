@@ -2,6 +2,8 @@
   package="com.jiguang.jmessageflutter">
     <application>
         <service android:name="com.jiguang.jmessageflutter.PushService"
+            android:enabled="true"
+            android:exported="false"
             android:process=":pushcore">
             <intent-filter>
                 <action android:name="cn.jiguang.user.service.action" />
