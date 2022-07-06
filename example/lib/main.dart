@@ -63,10 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // initPlatformState();
 
     jmessage..setDebugMode(enable: true);
+    addListener();
     jmessage.init(isOpenMessageRoaming: true, appkey: kMockAppkey);
     jmessage.applyPushAuthority(
         JMNotificationSettingsIOS(sound: true, alert: true, badge: true));
-    addListener();
   }
 
   void demoShowMessage(bool isShow, String msg) {

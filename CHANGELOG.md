@@ -1,3 +1,5 @@
+## 2.2.1
++修复  addSyncRoamingMessageListener 没回调问题
 ## 2.2.0
 +修复  enterChatRoom getChatRoomConversation 方法
 ## 2.1.9

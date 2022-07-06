@@ -3194,15 +3194,15 @@ public class JmessageFlutterPlugin implements FlutterPlugin, MethodCallHandler {
             HashMap json = new HashMap();
             json.put("conversation", toJson(event.getConversation()));
 
-            if (!mHasRoamingMsgListener) {
-                if (mRoamingMessageCache == null) {
-                    mRoamingMessageCache = new ArrayList<HashMap>();
-                }
-                mRoamingMessageCache.add(json);
-
-            } else if (mRoamingMessageCache == null) { // JS 已添加监听事件，没有缓存，直接触发事件。
+//            if (!mHasRoamingMsgListener) {
+//                if (mRoamingMessageCache == null) {
+//                    mRoamingMessageCache = new ArrayList<HashMap>();
+//                }
+//                mRoamingMessageCache.add(json);
+//
+//            } else if (mRoamingMessageCache == null) { // JS 已添加监听事件，没有缓存，直接触发事件。
                 JmessageFlutterPlugin.instance.channel.invokeMethod("onSyncRoamingMessage", json);
-            }
+//            }
         }
     }
 
