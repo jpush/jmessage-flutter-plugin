@@ -353,7 +353,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     jmessage.addSyncRoamingMessageListener((conversation) {
-      verifyConversation(conversation);
       print('listener receive event - sync roaming message');
     });
 

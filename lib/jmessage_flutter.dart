@@ -302,7 +302,7 @@ class JmessageFlutter {
         for (JMSyncRoamingMessageListener cb
             in _eventHanders.syncRoamingMessage) {
           Map json = call.arguments.cast<dynamic, dynamic>();
-          cb(JMConversationInfo.fromJson(json));
+          cb(JMConversationInfo.fromJson(json['conversation']));
         }
         break;
       case 'onContactNotify':
