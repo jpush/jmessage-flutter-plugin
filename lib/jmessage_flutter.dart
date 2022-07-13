@@ -566,6 +566,11 @@ class JmessageFlutter {
     Map<dynamic, dynamic>? customObject,
     double? latitude,
     double? longitude,
+    String? videoPath,
+    String? thumbImagePath,
+    String? thumbFormat,
+    String? videoFileName,
+    int? duration,
     int? scale,
     String? address,
     Map<dynamic, dynamic>? extras,
@@ -587,6 +592,11 @@ class JmessageFlutter {
         'longitude': longitude,
         'scale': scale,
         'address': address,
+        'videoPath': videoPath,
+        'thumbImagePath': thumbImagePath,
+        'thumbFormat': thumbFormat,
+        'videoFileName': videoFileName,
+        'duration': duration,
       });
 
     Map resMap = await _channel.invokeMethod(
@@ -611,7 +621,9 @@ class JmessageFlutter {
       };
     }
 
-    param..addAll(optionMap)..addAll({'id': message?.id});
+    param
+      ..addAll(optionMap)
+      ..addAll({'id': message?.id});
     Map resMap = await _channel.invokeMethod(
         'sendDraftMessage', param..removeWhere((key, value) => value == null));
     var res = JMNormalMessage.generateMessageFromJson(resMap);
@@ -639,7 +651,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'text': text});
+    param
+      ..addAll(optionMap)
+      ..addAll({'text': text});
 
     Map resMap = await _channel.invokeMethod(
         'sendTextMessage', param..removeWhere((key, value) => value == null));
@@ -669,7 +683,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendImageMessage', param..removeWhere((key, value) => value == null));
@@ -699,7 +715,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendVoiceMessage', param..removeWhere((key, value) => value == null));
@@ -729,7 +747,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'customObject': customObject});
+    param
+      ..addAll(optionMap)
+      ..addAll({'customObject': customObject});
 
     Map resMap = await _channel.invokeMethod(
         'sendCustomMessage', param..removeWhere((key, value) => value == null));
@@ -798,7 +818,9 @@ class JmessageFlutter {
       param..addAll({'extras': extras});
     }
 
-    param..addAll(optionMap)..addAll({'path': path});
+    param
+      ..addAll(optionMap)
+      ..addAll({'path': path});
 
     Map resMap = await _channel.invokeMethod(
         'sendFileMessage', param..removeWhere((key, value) => value == null));
@@ -963,6 +985,19 @@ class JmessageFlutter {
     await _channel.invokeMethod(
         'deleteMessageById', param..removeWhere((key, value) => value == null));
 
+    return;
+  }
+
+  /// 删除全部消息
+  /// target    聊天对象， JMSingle | JMGroup
+  Future<void> deleteAllMessage({
+    required dynamic type,
+
+    /// (JMSingle | JMGroup | JMChatRoom)
+  }) async {
+    Map param = type.toJson();
+    await _channel.invokeMethod(
+        'deleteAllMessage', param..removeWhere((key, value) => value == null));
     return;
   }
 
@@ -1334,6 +1369,21 @@ class JmessageFlutter {
     param['messageId'] = messageId;
     Map resJson = await _channel.invokeMethod(
         'downloadFile', param..removeWhere((key, value) => value == null));
+
+    return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
+  }
+
+  /// 下载视频
+  /// target    聊天对象， JMSingle | JMGroup | JMChatRoom
+  /// messageId 本地数据库中的消息 id
+  Future<Map> downloadVideoFile({
+    required dynamic target,
+    required String? messageId,
+  }) async {
+    Map param = target.toJson();
+    param['messageId'] = messageId;
+    Map resJson = await _channel.invokeMethod(
+        'downloadVideoFile', param..removeWhere((key, value) => value == null));
 
     return {'messageId': resJson['messageId'], 'filePath': resJson['filePath']};
   }
@@ -2055,7 +2105,7 @@ class JMNormalMessage {
       case JMMessageType.prompt:
         return JMPromptMessage.fromJson(json);
       case JMMessageType.video:
-        return JMPromptMessage.fromJson(json);
+        return JMVideoMessage.fromJson(json);
     }
   }
 }
@@ -2159,9 +2209,9 @@ class JMLocationMessage extends JMNormalMessage {
 
 class JMVideoMessage extends JMNormalMessage {
   String videoPath; // 视频地址
-  String thumbFormat; //视频缩略图格式名
+  String? thumbFormat; //视频缩略图格式名
   int duration; // 视频时长
-  String thumbImagePath; // 视频缩略图
+  String? thumbImagePath; // 视频缩略图
   String videoFileName; // 视频名称
 
   Map toJson() {
@@ -2212,7 +2262,19 @@ class JMPromptMessage extends JMNormalMessage {
         super.fromJson(json);
 }
 
-enum JMEventType { group_member_added, group_member_removed, group_member_exit }
+enum JMEventType {
+  group_member_added,
+  group_member_removed,
+  group_member_exit,
+  group_info_updated,
+  group_member_keep_silence,
+  group_member_keep_silence_cancel,
+  group_keeper_added,
+  group_keeper_removed,
+  group_dissolved,
+  group_owner_changed,
+  group_type_changed,
+}
 
 class JMEventMessage extends JMNormalMessage {
   JMEventType eventType; // 事件类型

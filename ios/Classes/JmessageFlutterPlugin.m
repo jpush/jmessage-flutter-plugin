@@ -410,6 +410,8 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       [self getMessageByServerMessageId:call result:result];
   } else if([@"deleteMessageById" isEqualToString:call.method]) {
     [self deleteMessageById:call result:result];
+  } else if([@"deleteAllMessage" isEqualToString:call.method]) {
+    [self deleteAllMessage:call result:result];
   } else if([@"sendInvitationRequest" isEqualToString:call.method]) {
     [self sendInvitationRequest:call result:result];
   } else if([@"acceptInvitation" isEqualToString:call.method]) {
@@ -470,6 +472,8 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
     [self downloadOriginalImage:call result:result];
   } else if([@"downloadVoiceFile" isEqualToString:call.method]) {
     [self downloadVoiceFile:call result:result];
+  } else if([@"downloadVideoFile" isEqualToString:call.method]) {
+    [self downloadVideoFile:call result:result];
   } else if([@"downloadFile" isEqualToString:call.method]) {
     [self downloadFile:call result:result];
   } else if([@"createConversation" isEqualToString:call.method]) {
@@ -1323,6 +1327,25 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
   }];
 }
 
+- (void)deleteAllMessage:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSDictionary *param = call.arguments;
+  [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+    if (error) {
+      result([error flutterError]);
+      return;
+    }
+    
+    BOOL res = [conversation deleteAllMessages];
+    
+    if (res) {
+      result(nil);
+    } else {
+      NSError *error = [NSError errorWithDomain:@"delete all message fail!" code: 1 userInfo: nil];
+      result([error flutterError]);
+    }
+  }];
+}
+
 - (void)sendInvitationRequest:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSDictionary *param = call.arguments;
   NSString *appKey = nil;
@@ -1981,22 +2004,37 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       return;
     }
     
-    if (message.contentType != kJMSGContentTypeImage) {
-      NSError *error = [NSError errorWithDomain:@"It is not image message!" code: 1 userInfo: nil];
+    if (message.contentType != kJMSGContentTypeImage && message.contentType != kJMSGContentTypeVideo) {
+      NSError *error = [NSError errorWithDomain:@"It is not image/video message!" code: 1 userInfo: nil];
       result([error flutterError]);
       return;
     }
-    
-    JMSGImageContent *content = (JMSGImageContent *) message.content;
-    
-    [content thumbImageData:^(NSData *data, NSString *objectId, NSError *error) {
-      if (error) {
-        result([error flutterError]);
-        return;
-      }
-      result(@{@"messageId": message.msgId,
-               @"filePath": content.thumbImageLocalPath ? : @""});
-    }];
+    if (message.contentType == kJMSGContentTypeImage) {
+      // 图片消息处理
+      JMSGImageContent *content = (JMSGImageContent *) message.content;
+      
+      [content thumbImageData:^(NSData *data, NSString *objectId, NSError *error) {
+        if (error) {
+          result([error flutterError]);
+          return;
+        }
+        result(@{@"messageId": message.msgId,
+                 @"filePath": content.thumbImageLocalPath ? : @""});
+      }];
+    } else if (message.contentType == kJMSGContentTypeVideo) {
+        // 视频消息处理
+        JMSGVideoContent *content = (JMSGVideoContent *) message.content;
+
+        [content videoThumbImageData:^(NSData *data, NSString *objectId, NSError *error) {
+          if (error) {
+            result([error flutterError]);
+            return;
+          }
+          result(@{@"messageId": message.msgId,
+                   @"filePath": content.videoThumbImageLocalPath ? : @""});
+        }];
+    }
+
     
   }];
 }
@@ -2117,6 +2155,44 @@ typedef void (^JMSGConversationCallback)(JMSGConversation *conversation,NSError 
       JMSGFileContent *fileContent = (JMSGFileContent *) message.content;
       result(@{@"messageId": message.msgId,
                @"filePath":[fileContent originMediaLocalPath] ? : @""});
+    }];
+    
+  }];
+}
+
+// 下载视频文件
+- (void)downloadVideoFile:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSDictionary *param = call.arguments;
+  [self getConversationWithDictionary:param callback:^(JMSGConversation *conversation, NSError *error) {
+    
+      JMSGMessage *message = nil;
+      NSString *msgid = param[@"messageId"];
+      if ([msgid hasPrefix:@"msgId"]) {
+          message = [conversation messageWithMessageId:msgid];
+      }else{
+          message = [conversation messageWithServerMessageId:msgid];
+      }
+    if (!message) {
+      NSError *error = [NSError errorWithDomain:@"cann't find this message!" code: 1 userInfo: nil];
+      result([error flutterError]);
+      return;
+    }
+    
+    if (message.contentType != kJMSGContentTypeVideo) {
+      NSError *error = [NSError errorWithDomain:@"It is not video message!" code: 1 userInfo: nil];
+      result([error flutterError]);
+      return;
+    }
+    
+    JMSGVideoContent *content = (JMSGVideoContent *) message.content;
+    [content videoDataWithProgress:nil completionHandler:^(NSData *data, NSString *objectId, NSError *error) {
+      if (error) {
+        result([error flutterError]);
+        return;
+      }
+        JMSGVideoContent *videoContent = (JMSGVideoContent *) message.content;
+        result(@{@"messageId": message.msgId,
+                 @"filePath":[videoContent originMediaLocalPath] ? : @""});
     }];
     
   }];

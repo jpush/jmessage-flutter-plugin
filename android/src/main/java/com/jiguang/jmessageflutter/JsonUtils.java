@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import cn.jmessage.support.google.gson.Gson;
 import cn.jmessage.support.google.gson.JsonElement;
 import cn.jmessage.support.google.gson.JsonObject;
 import cn.jmessage.support.google.gson.JsonParser;
@@ -437,13 +438,16 @@ class JsonUtils {
         }
 
         if (!TextUtils.isEmpty(conversation.getExtra())) {
-            HashMap extrasMap = new HashMap<String, Object>();
+//            HashMap extrasMap = new HashMap<String, Object>();
             String extras = conversation.getExtra();
-            JsonParser parser = new JsonParser();
-            JsonObject jsonObject = parser.parse(extras).getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                extrasMap.put(entry.getKey(), entry.getValue().toString());
-            }
+//            JsonParser parser = new JsonParser();
+//            JsonObject jsonObject = parser.parse(extras).getAsJsonObject();
+            // gson to map
+            Gson gson = new Gson();
+            HashMap extrasMap = gson.fromJson(extras, HashMap.class);
+//            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+//                extrasMap.put(entry.getKey(), entry.getValue());
+//            }
             json.put("extras", extrasMap);
         } else {
             json.put("extras", new HashMap());

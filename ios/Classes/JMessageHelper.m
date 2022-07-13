@@ -182,7 +182,7 @@
       dict[@"memberType"] = @"ordinary";
       break;
     case kJMSGGroupMemberTypeOwner:
-      
+      dict[@"memberType"] = @"owner";
       break;
     case kJMSGGroupMemberTypeAdmin:
       dict[@"memberType"] = @"admin";
@@ -296,6 +296,15 @@
       JMSGImageContent *imageContent = (JMSGImageContent *) self.content;
       dict[@"thumbPath"] = [imageContent thumbImageLocalPath];
       break;
+    }
+    case kJMSGContentTypeVideo: {
+      dict[@"type"] = @"video";
+        JMSGVideoContent *videoContent = (JMSGVideoContent *) self.content;
+        dict[@"videoPath"] = [videoContent originMediaLocalPath];
+        dict[@"thumbImagePath"] = [videoContent videoThumbImageLocalPath];
+        dict[@"duration"] = [videoContent duration];
+        dict[@"videoFileName"] = [videoContent fileName];
+        break;
     }
     case kJMSGContentTypeVoice: {
       dict[@"type"] = @"voice";
