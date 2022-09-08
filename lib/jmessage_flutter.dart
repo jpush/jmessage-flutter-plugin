@@ -1914,7 +1914,7 @@ class JMError {
 }
 
 class JMUserInfo {
-  JMTargetType type = JMTargetType.user;
+  JMTargetType userType = JMTargetType.user;
 
   String username; // 用户名
   String appKey; // 用户所属应用的 appKey，可与 username 共同作为用户的唯一标识
@@ -1941,7 +1941,7 @@ class JMUserInfo {
 
   Map toJson() {
     return {
-      'type': getStringFromEnum(type),
+      'type': getStringFromEnum(userType),
       'gender': getStringFromEnum(gender),
       'username': username,
       'appKey': appKey,
@@ -2500,7 +2500,8 @@ class JMConversationInfo {
       'title': title,
       'conversationType': getStringFromEnum(conversationType),
       'unreadCount': unreadCount,
-      'extras': extras.toString(),
+      'target': target,
+      'extras': extras,
     };
   }
 
